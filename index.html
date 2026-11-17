@@ -1,0 +1,1465 @@
+<title>Сечения многогранников</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%2064%2064%27%3E%3Crect%20x=%271.5%27%20y=%271.5%27%20width=%2761%27%20height=%2761%27%20rx=%2713%27%20fill=%27%23fbfcfe%27%20stroke=%27%23d3d9e8%27%20stroke-width=%272%27/%3E%3Cg%20fill=%27none%27%20stroke=%27%231b2a55%27%20stroke-width=%273%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27%3E%3Cpath%20d=%27M8%2056%2024%2042M24%2042V10M24%2042H56%27%20stroke-dasharray=%273.4%204.6%27%20stroke-width=%272.4%27/%3E%3Cpath%20d=%27M8%2024H40V56H8ZM8%2024%2024%2010H56L40%2024M56%2010V42L40%2056%27/%3E%3C/g%3E%3Cpolygon%20points=%278,46%2040,38%2056,26%2024,34%27%20fill=%27%232b9a63%27%20fill-opacity=%27.32%27/%3E%3Cg%20fill=%27none%27%20stroke=%27%232b9a63%27%20stroke-width=%272.8%27%20stroke-linecap=%27round%27%20stroke-linejoin=%27round%27%3E%3Cpath%20d=%27M8%2046%2040%2038%2056%2026%27/%3E%3Cpath%20d=%27M56%2026%2024%2034%208%2046%27%20stroke-dasharray=%273.2%203.6%27%20stroke-width=%272.4%27/%3E%3C/g%3E%3Cg%20fill=%27%231b2a55%27%20stroke=%27%23fbfcfe%27%20stroke-width=%271.4%27%3E%3Ccircle%20cx=%278%27%20cy=%2746%27%20r=%273.6%27/%3E%3Ccircle%20cx=%2740%27%20cy=%2738%27%20r=%273.6%27/%3E%3Ccircle%20cx=%2756%27%20cy=%2726%27%20r=%273.6%27/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=PT+Serif:ital,wght@1,400;1,700&display=swap">
+<style>
+/* Раскладка: заголовок и очки, условие, поле с чертежом и панелью инструментов, ход построения.
+   Чертёж на клетчатой бумаге: синяя паста для параллелепипеда, красная для построений, зелёная для сечения. */
+:root {
+  --page: #eef1f7;
+  --paper: #fbfcfe;
+  --soft: #e7ecf6;
+  --ink: #18223a;
+  --muted: #5a6685;
+  --rule: #d3d9e8;
+  --grid: rgba(39, 69, 214, .075);
+  --box: #1b2a55;
+  --red: #c9302c;
+  --teal: #0b7f70;
+  --sec: #2b9a63;
+  --amber: #e69500;
+  --accent: #2745d6;
+  --on-accent: #ffffff;
+  --accent-soft: #dfe6ff;
+  --font-ui: 'Golos Text', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-math: 'PT Serif', Georgia, 'Times New Roman', serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --page: #0e1220; --paper: #151b2d; --soft: #1d2540; --ink: #e5e9f6; --muted: #9ba7c6; --rule: #2a3352;
+    --grid: rgba(123, 147, 255, .09); --box: #c3cffa; --red: #ff7d74; --teal: #4fd4bf; --sec: #43d595; --amber: #ffc233;
+    --accent: #8197ff; --on-accent: #0e1220; --accent-soft: #263268; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --page: #0e1220; --paper: #151b2d; --soft: #1d2540; --ink: #e5e9f6; --muted: #9ba7c6; --rule: #2a3352;
+  --grid: rgba(123, 147, 255, .09); --box: #c3cffa; --red: #ff7d74; --teal: #4fd4bf; --sec: #43d595; --amber: #ffc233;
+  --accent: #8197ff; --on-accent: #0e1220; --accent-soft: #263268; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--page); color: var(--ink); font-family: var(--font-ui); font-size: 15px; line-height: 1.5; }
+.wrap {
+  max-width: 920px; margin: 0 auto; padding-block: 20px 48px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 16px;
+}
+i { font-family: var(--font-math); font-style: italic; }
+sub { font-size: .72em; line-height: 0; font-style: normal; }
+button, select { font: inherit; color: inherit; }
+button:focus-visible, select:focus-visible, [tabindex]:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.langsw { display: inline-flex; border: 1px solid var(--rule); border-radius: 999px; overflow: hidden; background: var(--paper); }
+.langsw button { border: 0; background: none; padding: 6px 12px; font-size: 13px; font-weight: 600; letter-spacing: .04em; color: var(--muted); cursor: pointer; }
+.langsw button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
+.top-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.contacts { text-align: center; color: var(--muted); font-size: 14px; padding-top: 4px; }
+.contacts p { margin: 0; }
+.cname { color: var(--ink); font-weight: 600; margin-bottom: 4px !important; }
+.clinks { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 18px; }
+.clinks a { color: var(--accent); text-decoration: none; }
+.clinks a:hover { text-decoration: underline; }
+.homelink { display: inline-block; font-size: 13px; color: var(--accent); text-decoration: none; margin-bottom: 2px; }
+.homelink:hover { text-decoration: underline; }
+.brand { display: flex; align-items: center; gap: 12px; }
+.logo { width: 54px; height: 54px; flex: none; }
+.top { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.eyebrow { margin: 0; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { margin: 2px 0 0; font-size: clamp(24px, 4.4vw, 32px); line-height: 1.15; font-weight: 600; letter-spacing: -.01em; text-wrap: balance; }
+.score { display: flex; align-items: baseline; gap: 8px; padding: 6px 14px; border: 1px solid var(--rule); border-radius: 999px; background: var(--paper); }
+.score span { color: var(--muted); font-size: 13px; }
+.score b { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.task { background: var(--paper); border: 1px solid var(--rule); border-radius: 12px; padding: 16px 18px; display: grid; gap: 10px; }
+.stmt { margin: 0; font-size: 17px; line-height: 1.55; text-wrap: pretty; }
+.facts { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 4px 20px; color: var(--muted); font-size: 14px; }
+.level { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; flex: none; }
+.task-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; }
+.task-row .facts { flex: 1 1 280px; min-width: 0; }
+select { background: var(--paper); border: 1px solid var(--rule); border-radius: 8px; padding: 6px 10px; min-height: 36px; }
+
+.board { background: var(--paper); border: 1px solid var(--rule); border-radius: 12px; padding: 12px; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; min-width: 0; }
+.main { display: grid; gap: 10px; min-width: 0; align-content: start; }
+.tb { display: flex; flex-direction: column; gap: 12px; width: 132px; align-self: start; }
+.grp { display: grid; grid-template-columns: repeat(3, 40px); gap: 6px; }
+.ib { width: 40px; height: 40px; padding: 0; border: 1px solid var(--rule); background: var(--paper); border-radius: 10px; cursor: pointer; display: grid; place-items: center; color: var(--ink); }
+.ib svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.ib svg .f { fill: currentColor; stroke: none; }
+.ib:hover:not(:disabled) { background: var(--soft); }
+.ib[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.ib:disabled { opacity: .4; cursor: default; }
+.grp .c2 { grid-column: 2; } .grp .c1 { grid-column: 1; } .grp .c3 { grid-column: 3; }
+.btn { border: 1px solid var(--rule); background: var(--paper); border-radius: 10px; padding: 8px 14px; min-height: 40px; cursor: pointer; font-size: 14px; }
+.btn:hover:not(:disabled) { background: var(--soft); }
+.btn.primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 600; width: 100%; }
+.btn.primary:hover:not(:disabled) { filter: brightness(1.08); }
+.btn:disabled { opacity: .45; cursor: default; }
+.task-top { display: flex; gap: 12px; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; }
+.task-top .stmt { flex: 1 1 320px; min-width: 0; }
+.task-top .btn { flex: none; }
+
+.fig { border-radius: 10px; overflow: hidden; border: 1px solid var(--rule);
+  background-color: var(--paper);
+  background-image: linear-gradient(var(--grid) 1px, transparent 1px), linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 24px 24px; }
+svg#fig { display: block; width: 100%; height: auto; aspect-ratio: 760 / 500; touch-action: none; cursor: grab; user-select: none; -webkit-user-select: none; }
+svg#fig:active { cursor: grabbing; }
+svg text { font-family: var(--font-math); font-style: italic; fill: var(--ink); paint-order: stroke; stroke: var(--paper); stroke-linejoin: round; }
+svg text.vl { fill: var(--box); }
+svg text.pl { font-weight: 700; }
+.edge { stroke: var(--box); fill: none; stroke-linecap: round; }
+.cl { stroke: var(--red); fill: none; stroke-linecap: round; }
+.cl.ray { opacity: .9; }
+.edge.ext { stroke: var(--red); opacity: .85; }
+.cl.sel { stroke: var(--amber); }
+.sec-fill { fill: var(--sec); fill-opacity: .2; stroke: none; }
+.sec-edge { stroke: var(--sec); fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.hit { stroke: transparent; fill: transparent; cursor: pointer; }
+.tip { stroke: var(--paper); }
+.tip-line, .tip-edge { fill: var(--amber); }
+.grip { fill: none; stroke: var(--red); opacity: .75; }
+.vgrip { fill: none; stroke: var(--box); opacity: .35; }
+.vhint { margin: 0; color: var(--muted); font-size: 13px; }
+.pt-given { fill: var(--box); stroke: var(--paper); }
+.pt-found { fill: var(--red); stroke: var(--paper); }
+.pt-found.on { fill: var(--teal); }
+.pt-ext { fill: var(--paper); stroke: var(--red); }
+.hot { fill: var(--paper); stroke: var(--red); animation: pulse 1.6s ease-in-out infinite; }
+.ring-sel { fill: none; stroke: var(--accent); }
+.ring-hint { fill: none; stroke: var(--teal); animation: pulse 1.1s ease-in-out infinite; }
+@keyframes pulse { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .hot, .ring-hint { animation: none; } }
+
+.legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, max-content)); gap: 6px 20px; color: var(--muted); font-size: 13px; margin: 0; padding: 0; list-style: none; }
+.legend li { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+.dot.g { background: var(--box); } .dot.f { background: var(--red); } .dot.o { background: var(--teal); }
+.dot.h { border: 2px solid var(--red); background: var(--paper); }
+.dot.tip { background: var(--amber); width: 8px; height: 8px; }
+.dash { width: 22px; border-top: 2px dashed var(--box); display: inline-block; }
+
+
+.status { margin: 0; padding: 10px 12px; background: var(--soft); border-radius: 8px; min-height: 4.6em; font-size: 15px; text-wrap: pretty; }
+.status:empty { visibility: hidden; min-height: 2.6em; }
+
+.steps { background: var(--paper); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 18px 16px; grid-column: 1 / -1; min-width: 0; }
+.steps-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }
+.steps-head h2 { margin: 0; }
+.repinfo { margin: 0 0 8px; color: var(--muted); font-size: 13px; }
+.repinfo:has(#rep-clear[hidden]):has(#rep-count:empty) { display: none; }
+.linkbtn { border: 0; background: none; color: var(--accent); cursor: pointer; font: inherit; text-decoration: underline; padding: 0; }
+.savebtns { flex-wrap: wrap; display: inline-flex; gap: 6px; }
+.btn.small { min-height: 32px; padding: 4px 10px; font-size: 13px; }
+@media (min-width: 1020px) {
+  .wrap { max-width: 1260px; }
+  .board { grid-template-columns: auto minmax(0, 1fr) 300px; }
+  .steps { grid-column: auto; align-self: start; max-height: 640px; overflow: auto; }
+}
+.steps h2 { margin: 0; font-size: 16px; font-weight: 600; }
+.steps ol { margin: 0; padding-left: 1.6em; display: grid; gap: 4px; font-size: 14.5px; }
+.steps li::marker { color: var(--muted); font-variant-numeric: tabular-nums; }
+.steps .empty { margin: 0; color: var(--muted); font-size: 14px; }
+@media (max-width: 640px) {
+  .stmt { font-size: 16px; }
+  .board { grid-template-columns: minmax(0, 1fr); }
+  .tb { width: auto; flex-direction: row; flex-wrap: wrap; align-items: flex-start; gap: 10px 14px; }
+  .grp:not(.pad) { display: flex; flex-wrap: wrap; }
+  .btn.primary { width: auto; align-self: center; padding-inline: 24px; }
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect x="1.5" y="1.5" width="61" height="61" rx="13" fill="#fbfcfe" stroke="#d3d9e8" stroke-width="2"/><g fill="none" stroke="#1b2a55" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M8 56 24 42M24 42V10M24 42H56" stroke-dasharray="3.4 4.6" stroke-width="2.4"/><path d="M8 24H40V56H8ZM8 24 24 10H56L40 24M56 10V42L40 56"/></g><polygon points="8,46 40,38 56,26 24,34" fill="#2b9a63" fill-opacity=".32"/><g fill="none" stroke="#2b9a63" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 46 40 38 56 26"/><path d="M56 26 24 34 8 46" stroke-dasharray="3.2 3.6" stroke-width="2.4"/></g><g fill="#1b2a55" stroke="#fbfcfe" stroke-width="1.4"><circle cx="8" cy="46" r="3.6"/><circle cx="40" cy="38" r="3.6"/><circle cx="56" cy="26" r="3.6"/></g></svg>
+      <div>
+      <a class="homelink" id="home" href="/" data-i18n="home" hidden>← Все тренажёры</a>
+      <p class="eyebrow" data-i18n="eyebrow">Метод следов</p>
+      <h1 data-i18n="h1">Сечения многогранников</h1>
+      </div>
+    </div>
+    <div class="top-right"><div class="langsw" role="group" aria-label="Language"><button type="button" id="lang-ru" aria-pressed="true">RU</button><button type="button" id="lang-en" aria-pressed="false">EN</button></div>
+    <div class="score" aria-live="polite"><span data-i18n="score">Очки</span><b id="score">0</b></div></div>
+  </header>
+
+  <section class="task" data-i18n-aria="sec_task" aria-label="Условие">
+    <div class="task-top">
+      <p class="stmt" id="stmt"></p>
+      <button type="button" class="btn" id="new" data-i18n="new">Новое сечение</button>
+    </div>
+    <div class="task-row">
+      <label class="level"><span data-i18n="shape">Фигура</span>
+        <select id="shape">
+          <option value="box">Параллелепипед</option>
+          <option value="prism3">Треугольная призма</option>
+          <option value="prism6">Шестиугольная призма</option>
+          <option value="pyr3">Треугольная пирамида</option>
+          <option value="pyr4">Четырёхугольная пирамида</option>
+          <option value="pyr6">Шестиугольная пирамида</option>
+        </select>
+      </label>
+      <label class="level"><span data-i18n="pos">Положение точек</span>
+        <select id="level">
+          <option value="edges" data-i18n="pos_edges">на рёбрах</option>
+          <option value="faces" data-i18n="pos_faces">на рёбрах и в гранях</option>
+        </select>
+      </label>
+      <ul class="facts" id="facts"></ul>
+    </div>
+  </section>
+
+  <section class="board" data-i18n-aria="sec_board" aria-label="Построение">
+    <div class="tb" role="toolbar" data-i18n-aria="g_tools" aria-label="Инструменты">
+      <div class="grp" role="group" data-i18n-aria="g_build" aria-label="Построение">
+        <button type="button" class="ib" id="tool-seg" aria-pressed="true" data-i18n-title="t_seg" data-i18n-aria="t_seg" title="Отрезок через две точки" aria-label="Отрезок через две точки"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="5" y1="18" x2="19" y2="6"/><circle class="f" cx="5" cy="18" r="2.6"/><circle class="f" cx="19" cy="6" r="2.6"/></svg></button>
+        <button type="button" class="ib" id="tool-par" aria-pressed="false" data-i18n-title="t_par" data-i18n-aria="t_par" title="Параллельная прямая" aria-label="Параллельная прямая"><svg viewBox="0 0 24 24" aria-hidden="true"><line x1="3" y1="10" x2="16" y2="3"/><line x1="8" y1="21" x2="21" y2="14"/><circle class="f" cx="14.5" cy="17.2" r="2.4"/></svg></button>
+        <button type="button" class="ib" id="hint" data-i18n-title="t_hint" data-i18n-aria="t_hint" title="Подсказка" aria-label="Подсказка"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.4 9.4a2.7 2.7 0 1 1 3.9 2.4c-.9.5-1.3 1-1.3 2"/><circle class="f" cx="12" cy="17.2" r="1.2"/></svg></button>
+        <button type="button" class="ib" id="undo" data-i18n-title="t_undo" data-i18n-aria="t_undo" title="Отменить шаг" aria-label="Отменить шаг"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H9"/></svg></button>
+        <button type="button" class="ib" id="reset" data-i18n-title="t_reset" data-i18n-aria="t_reset_a" title="Сначала" aria-label="Начать построение сначала"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.7-6"/><path d="M20 3.5V8h-4.5"/></svg></button>
+      </div>
+      <div class="grp" role="group" data-i18n-aria="g_zoom" aria-label="Масштаб">
+        <button type="button" class="ib" id="zoom-in" data-i18n-title="t_zin" data-i18n-aria="t_zin" title="Увеличить" aria-label="Увеличить"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></button>
+        <button type="button" class="ib" id="zoom-out" data-i18n-title="t_zout" data-i18n-aria="t_zout" title="Уменьшить" aria-label="Уменьшить"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+      </div>
+      <div class="grp pad" role="group" data-i18n-aria="g_pan" aria-label="Сдвиг картинки">
+        <button type="button" class="ib c2" id="pan-up" data-i18n-title="t_up" data-i18n-aria="t_up" title="Сдвинуть вверх" aria-label="Сдвинуть вверх"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6"/></svg></button>
+        <button type="button" class="ib c1" id="pan-left" data-i18n-title="t_left" data-i18n-aria="t_left" title="Сдвинуть влево" aria-label="Сдвинуть влево"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg></button>
+        <button type="button" class="ib" id="view-reset" data-i18n-title="t_vreset" data-i18n-aria="t_vreset" title="Вид по умолчанию" aria-label="Вид по умолчанию"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3"/></svg></button>
+        <button type="button" class="ib" id="pan-right" data-i18n-title="t_right" data-i18n-aria="t_right" title="Сдвинуть вправо" aria-label="Сдвинуть вправо"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+        <button type="button" class="ib c2" id="pan-down" data-i18n-title="t_down" data-i18n-aria="t_down" title="Сдвинуть вниз" aria-label="Сдвинуть вниз"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M6 13l6 6 6-6"/></svg></button>
+      </div>
+      <button type="button" class="btn primary" id="done" data-i18n="done">Готово</button>
+    </div>
+    <div class="main">
+      <div class="fig"><svg id="fig" xmlns="http://www.w3.org/2000/svg" role="img" data-i18n-aria="fig_a" aria-label="Чертёж многогранника"></svg></div>
+      <p class="vhint" data-i18n="vhint">Тяните за фон, чтобы вращать фигуру. Тяните за точку, конец отрезка или вершину, чтобы вытянуть луч.</p>
+      <p class="status" id="status" role="status"></p>
+      <ul class="legend">
+        <li><span class="dot g"></span><span data-i18n="lg_given">заданная точка</span></li>
+        <li><span class="dot o"></span><span data-i18n="lg_vertex">вершина сечения на ребре</span></li>
+        <li><span class="dot f"></span><span data-i18n="lg_trace">точка вне ребра (след)</span></li>
+        <li><span class="dot h"></span><span data-i18n="lg_cross">точка пересечения (показана в подсказке)</span></li>
+        <li><span class="dot tip"></span><span data-i18n="lg_tip">конец луча: тяните, чтобы менять длину</span></li>
+        <li><span class="dash"></span><span data-i18n="lg_hidden">невидимые линии</span></li>
+      </ul>
+    </div>
+    <aside class="steps" data-i18n-aria="steps_h" aria-label="Ход построения">
+      <div class="steps-head">
+        <h2 data-i18n="steps_h">Ход построения</h2>
+        <span class="savebtns"><button type="button" class="btn small" id="rep-add" data-i18n="rep_add" data-i18n-title="rep_add_t" title="Добавить это построение в файл, чтобы потом сохранить несколько построений вместе">Добавить в файл</button> <button type="button" class="btn small" id="save-pdf" data-i18n-title="pdf_t" title="Сохранить в PDF">PDF</button> <button type="button" class="btn small" id="save-html" data-i18n-title="html_t" title="Сохранить как HTML-файл">HTML</button></span>
+      </div>
+      <p class="repinfo"><span id="rep-count"></span> <button type="button" class="linkbtn" id="rep-clear" data-i18n="clear" hidden>очистить</button></p>
+      <p class="empty" id="log-empty" data-i18n="steps_empty">Здесь появятся ваши шаги.</p>
+      <ol id="log"></ol>
+    </aside>
+  </section>
+
+  <footer class="contacts">
+    <p class="cname" data-i18n="c_name">Руслан Владимирович Куцов</p>
+    <p class="clinks">
+      <a href="https://t.me/Ruslan_Phys_Math" target="_blank" rel="noopener noreferrer">Telegram</a>
+      <a href="https://wa.me/79081307537" target="_blank" rel="noopener noreferrer">WhatsApp</a>
+      <a href="https://vk.ru/ruslan_phys_math" target="_blank" rel="noopener noreferrer" data-i18n="c_vk">ВКонтакте</a>
+      <a href="https://profi.ru/profile/KutsovRV/" target="_blank" rel="noopener noreferrer" data-i18n="c_profi">Профи.ру</a>
+    </p>
+  </footer>
+
+</div>
+
+<script>
+/* ===== Геометрия и логика тренажёра сечений многогранников ===== */
+const EPS = 1e-6;
+const TOL = 0.03;
+const rnd = v => Math.round(v * 1e5) / 1e5 + 0;
+const pkey = p => p.map(rnd).join(',');
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
+const add = (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]];
+const mul = (a, s) => [a[0] * s, a[1] * s, a[2] * s];
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const cross = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const len = a => Math.hypot(a[0], a[1], a[2]);
+const unit = a => mul(a, 1 / len(a));
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const ri = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+const sub1 = s => s.replace(/(\d+)/g, '<sub>$1</sub>');
+const H = s => '<i>' + sub1(s) + '</i>';
+/* ===== Язык: русский / английский ===== */
+let LANG = 'ru';
+const setLang = l => { LANG = l === 'en' ? 'en' : 'ru'; };
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const SH = {
+  box: { ru: ['параллелепипеда', 'Параллелепипед'], en: ['cuboid', 'Cuboid'] },
+  prism3: { ru: ['треугольной призмы', 'Треугольная призма'], en: ['triangular prism', 'Triangular prism'] },
+  prism6: { ru: ['шестиугольной призмы', 'Шестиугольная призма'], en: ['hexagonal prism', 'Hexagonal prism'] },
+  pyr3: { ru: ['треугольной пирамиды', 'Треугольная пирамида'], en: ['triangular pyramid', 'Triangular pyramid'] },
+  pyr4: { ru: ['четырёхугольной пирамиды', 'Четырёхугольная пирамида'], en: ['quadrilateral pyramid', 'Quadrilateral pyramid'] },
+  pyr6: { ru: ['шестиугольной пирамиды', 'Шестиугольная пирамида'], en: ['hexagonal pyramid', 'Hexagonal pyramid'] }
+};
+const shapeTitle = k => SH[k][LANG][0], shapeLabel = k => SH[k][LANG][1];
+const KINDS = {
+  tri: ['треугольник', 'triangle'], pent: ['пятиугольник', 'pentagon'], hex: ['шестиугольник', 'hexagon'], hept: ['семиугольник', 'heptagon'],
+  oct: ['восьмиугольник', 'octagon'], poly: ['многоугольник', 'polygon'], square: ['квадрат', 'square'], rect: ['прямоугольник', 'rectangle'],
+  rhombus: ['ромб', 'rhombus'], para: ['параллелограмм', 'parallelogram'], isoTrap: ['равнобедренная трапеция', 'isosceles trapezoid'],
+  rightTrap: ['прямоугольная трапеция', 'right trapezoid'], trap: ['трапеция', 'trapezoid'], quad: ['четырёхугольник', 'quadrilateral']
+};
+const kindName = k => KINDS[k][LANG === 'en' ? 1 : 0];
+const kindArt = k => LANG === 'en' ? (/^[aeiou]/.test(kindName(k)) ? 'an ' : 'a ') + kindName(k) : kindName(k);
+
+/* Подписи прямых хранятся как данные {t:'seg'|'par', n:'MN'|'P'} и превращаются в текст на текущем языке */
+const lineNom = lb => lb.t === 'seg' ? (LANG === 'en' ? 'segment ' : 'отрезок ') + H(lb.n) : (LANG === 'en' ? 'line through ' : 'прямая через ') + H(lb.n);
+const lineAcc = lb => lb.t === 'seg' ? lineNom(lb) : (LANG === 'en' ? 'line through ' : 'прямую через ') + H(lb.n);
+const lineShort = lb => lb.t === 'seg' ? H(lb.n) : (LANG === 'en' ? 'the line through ' : 'прямая через ') + H(lb.n);
+const lineCross = lb => lb.t === 'seg' ? (LANG === 'en' ? 'line ' : 'прямой ') + H(lb.n) : (LANG === 'en' ? 'the line through ' : 'прямой через ') + H(lb.n);
+const lineFrom = lb => lb.t === 'seg' ? (LANG === 'en' ? 'segment ' : 'отрезка ') + H(lb.n) : (LANG === 'en' ? 'the line through ' : 'прямой через ') + H(lb.n);
+const whereText = w => w.on
+  ? (LANG === 'en' ? 'on edge ' : 'на ребре ') + H(w.name)
+  : (LANG === 'en' ? 'on the extension of edge ' + H(w.name) + ' beyond vertex ' + H(w.v) : 'на продолжении ребра ' + H(w.name) + ' за вершину ' + H(w.v));
+function logHtml(e) {
+  const en = LANG === 'en';
+  if (e.k === 'seg') return (en ? 'Segment ' : 'Отрезок ') + H(e.n) + (en ? (e.plane ? ' in the plane of face ' : ' in face ') : (e.plane ? ' в плоскости грани ' : ' в грани ')) + H(e.f);
+  if (e.k === 'par') return en
+    ? 'Through ' + H(e.p) + ' in face ' + H(e.f) + ' a line parallel to ' + lineShort(e.ref) + ' is drawn (the cutting plane meets parallel faces in parallel lines)'
+    : 'Через ' + H(e.p) + ' в грани ' + H(e.f) + ' проведена прямая, параллельная ' + lineShort(e.ref) + ' (секущая плоскость пересекает параллельные грани по параллельным прямым)';
+  return en
+    ? H(e.l) + ' — intersection of ' + lineCross(e.via) + ' with line ' + H(e.edge) + ', ' + whereText(e.w)
+    : H(e.l) + ' — пересечение ' + lineCross(e.via) + ' с прямой ' + H(e.edge) + ', ' + whereText(e.w);
+}
+
+const M = {
+  ru: {
+    start: 'Две точки, лежащие в одной плоскости, можно соединить отрезком.',
+    err_noface: (a, b) => 'Точки ' + H(a) + ' и ' + H(b) + ' не лежат ни в одной общей грани, отрезок между ними не получится. Выберите другую пару.',
+    err_sameedge: (a, b) => 'Точки ' + H(a) + ' и ' + H(b) + ' лежат на одном ребре. Выберите другую пару.',
+    err_par_noface: f => 'У грани ' + H(f) + ' нет параллельной грани, поэтому параллельную прямую провести нельзя.',
+    err_par_notin: (p, g, f) => 'Точка ' + H(p) + ' не лежит в грани ' + H(g) + ', параллельной грани ' + H(f) + ', где проведена выбранная прямая. Выберите другую точку.',
+    ext_done: 'Если продолжения пересеклись, нажмите на точку пересечения, чтобы отметить её. Если нет, тяните дальше или продлите ребро.',
+    crossed: (l, w) => 'Точка ' + H(l) + ' построена ' + whereText(w) + '. ' + (w.on ? 'Она лежит на ребре, значит это вершина сечения.' : 'Она вне многогранника, но лежит в секущей плоскости.'),
+    vx_hint: 'Чтобы продлить ребро, потяните за его вершину вдоль ребра.',
+    par_pick_noface: f => 'У грани ' + H(f) + ' нет параллельной грани, поэтому выбрать здесь прямую для параллельного переноса нельзя.',
+    par_selected: (lb, g, f) => 'Выбран ' + lineNom(lb) + '. Теперь нажмите на точку в грани ' + H(g) + ', параллельной грани ' + H(f) + '.',
+    sel_first: l => 'Точка ' + H(l) + ' выбрана. Выберите вторую точку из той же грани. Чтобы вытянуть луч из точки, потяните за неё.',
+    seg_done: (again, lb, f) => (again ? 'Этот отрезок уже есть. ' : 'Проведён ' + lineNom(lb) + ' в грани ' + H(f) + '. ') + 'Потяните за его конец (или за вершину многогранника), чтобы вытянуть луч до пересечения с прямой.',
+    par_first: 'Сначала нажмите на одну из проведённых прямых.',
+    par_done: (lb, f) => 'Проведена ' + lineNom(lb) + ' в грани ' + H(f) + '. Потяните за её концы, чтобы продлить до пересечения с ребром.',
+    mode_par: 'Секущая плоскость пересекает параллельные грани по параллельным прямым. Нажмите на проведённую прямую, затем на точку в параллельной ей грани.',
+    undone: 'Шаг отменён.',
+    all_found: 'Все вершины найдены. Нажмите «Готово».',
+    hint_draw: (ab, f, out) => 'Проведите отрезок ' + H(ab) + (out.length
+      ? ': обе точки лежат в плоскости грани ' + H(f) + ' (' + out.map(o => H(o.l) + (o.e ? ' лежит на прямой ' + H(o.e) : '')).join(', ') + ' — продолжении ребра этой грани), а секущая плоскость пересекает плоскость грани по прямой.'
+      : ': обе точки лежат в грани ' + H(f) + '.'),
+    hint_par: (lb, p, g, f) => 'Возьмите инструмент «Параллельная прямая»: выберите ' + lineAcc(lb) + ', затем точку ' + H(p) + '. Она лежит в грани ' + H(g) + ', параллельной грани ' + H(f) + ', а секущая плоскость пересекает такие грани по параллельным прямым.',
+    hint_ray: (lb, ext, root, en) => 'Вытяните луч из ' + lineFrom(lb) + ': ' + (ext ? 'потяните за конец луча' : 'потяните от ' + (root ? 'точки ' + H(root) : 'конца')) + ' к месту, где он встретит прямую ' + H(en) + '. Затем нажмите на точку пересечения.',
+    hint_edge: (nm, was, v) => 'Продлите ребро ' + H(nm) + ': ' + (was ? 'потяните за конец продолжения' : 'потяните от вершины ' + H(v) + ' вдоль ребра') + ' до пересечения с лучом. Небольшой хвостик за точкой пересечения не помешает.',
+    hint_pick: 'Нажмите на отмеченное кольцо: здесь прямые пересеклись.',
+    rep_count: n => 'В файле: ' + n,
+    save_fail: 'Не удалось сохранить файл.',
+    rep_full: 'В файле уже 30 построений. Сохраните их и очистите файл.',
+    rep_added: n => 'Построение добавлено в файл (' + n + '). Кнопки «PDF» и «HTML» сохранят все добавленные построения.',
+    rep_cleared: 'Файл очищен.',
+    not_done: 'Сечение пока не построено: найдены не все точки, в которых плоскость пересекает рёбра. Продолжайте построение или возьмите подсказку.',
+    done_ok: (k, pt, hinted) => 'Верно! Сечение — ' + kindName(k) + '.' + (pt ? ' +1 очко.' : ' Очко не засчитано, потому что вы брали подсказку. Попробуйте новое сечение без неё.') + ' Фигуру можно повернуть, чтобы рассмотреть сечение.',
+    pt_aria: l => 'Точка ' + l,
+    no_par: 'У этой фигуры нет параллельных граней',
+    stmt: (shape, name) => 'Постройте сечение ' + shape + ' ' + H(name) + ' плоскостью, проходящей через точки ' + H('M') + ', ' + H('N') + ' и ' + H('K') + '.',
+    fact_edge: (l, e) => H(l) + ' лежит на ребре ' + H(e),
+    fact_face: (l, f) => H(l) + ' лежит в грани ' + H(f),
+    report_head: (i, n) => 'Метод следов · сечения многогранников' + (n > 1 ? ' · ' + (i + 1) + ' из ' + n : ''),
+    steps_h: 'Ход построения', no_steps: 'Шагов пока нет.',
+    result: k => 'Сечение — ' + kindName(k) + '.', alt_fig: 'Чертёж', html_title: 'Сечения многогранников'
+  },
+  en: {
+    start: 'Two points lying in the same plane can be joined by a segment.',
+    err_noface: (a, b) => 'Points ' + H(a) + ' and ' + H(b) + ' do not lie in a common face, so a segment between them will not work. Choose another pair.',
+    err_sameedge: (a, b) => 'Points ' + H(a) + ' and ' + H(b) + ' lie on the same edge. Choose another pair.',
+    err_par_noface: f => 'Face ' + H(f) + ' has no parallel face, so a parallel line cannot be drawn.',
+    err_par_notin: (p, g, f) => 'Point ' + H(p) + ' is not in face ' + H(g) + ', which is parallel to face ' + H(f) + ' where the chosen line is drawn. Choose another point.',
+    ext_done: 'If the extensions have met, click the intersection point to mark it. If not, keep pulling or extend an edge.',
+    crossed: (l, w) => 'Point ' + H(l) + ' is placed ' + whereText(w) + '. ' + (w.on ? 'It lies on an edge, so it is a vertex of the section.' : 'It is outside the polyhedron but lies in the cutting plane.'),
+    vx_hint: 'To extend an edge, drag its vertex along the edge.',
+    par_pick_noface: f => 'Face ' + H(f) + ' has no parallel face, so a line here cannot be used for a parallel construction.',
+    par_selected: (lb, g, f) => cap(lineNom(lb)) + ' selected. Now click a point in face ' + H(g) + ', which is parallel to face ' + H(f) + '.',
+    sel_first: l => 'Point ' + H(l) + ' selected. Choose a second point in the same face. To pull a ray out of a point, drag it.',
+    seg_done: (again, lb, f) => (again ? 'This segment already exists. ' : cap(lineNom(lb)) + ' drawn in face ' + H(f) + '. ') + 'Drag its end (or a vertex of the polyhedron) to pull a ray until it meets a line.',
+    par_first: 'First click one of the lines you have drawn.',
+    par_done: (lb, f) => cap(lineNom(lb)) + ' drawn in face ' + H(f) + '. Drag its ends to extend it until it meets an edge.',
+    mode_par: 'The cutting plane meets parallel faces in parallel lines. Click a line you have drawn, then a point in the face parallel to it.',
+    undone: 'Step undone.',
+    all_found: 'All vertices found. Press “Done”.',
+    hint_draw: (ab, f, out) => 'Draw segment ' + H(ab) + (out.length
+      ? ': both points lie in the plane of face ' + H(f) + ' (' + out.map(o => H(o.l) + (o.e ? ' lies on line ' + H(o.e) : '')).join(', ') + ' — an extension of an edge of this face), and the cutting plane meets the plane of the face in a line.'
+      : ': both points lie in face ' + H(f) + '.'),
+    hint_par: (lb, p, g, f) => 'Take the “Parallel line” tool: choose ' + lineAcc(lb) + ', then point ' + H(p) + '. It lies in face ' + H(g) + ', parallel to face ' + H(f) + ', and the cutting plane meets such faces in parallel lines.',
+    hint_ray: (lb, ext, root, en) => 'Pull a ray out of ' + lineFrom(lb) + ': ' + (ext ? 'drag the end of the ray' : 'drag from ' + (root ? 'point ' + H(root) : 'its end')) + ' to where it meets line ' + H(en) + '. Then click the intersection point.',
+    hint_edge: (nm, was, v) => 'Extend edge ' + H(nm) + ': ' + (was ? 'drag the end of the extension' : 'drag from vertex ' + H(v) + ' along the edge') + ' until it meets the ray. A small tail beyond the intersection point does no harm.',
+    hint_pick: 'Click the marked ring: the lines meet here.',
+    rep_count: n => 'In file: ' + n,
+    save_fail: 'Could not save the file.',
+    rep_full: 'The file already has 30 constructions. Save them and clear the file.',
+    rep_added: n => 'Construction added to the file (' + n + '). The “PDF” and “HTML” buttons will save all added constructions.',
+    rep_cleared: 'File cleared.',
+    not_done: 'The cross-section is not complete yet: not all points where the plane meets the edges have been found. Keep going or take a hint.',
+    done_ok: (k, pt, hinted) => 'Correct! The cross-section is ' + kindArt(k) + '.' + (pt ? ' +1 point.' : ' No point awarded because you used a hint. Try a new cross-section without one.') + ' You can rotate the figure to look at the section.',
+    pt_aria: l => 'Point ' + l,
+    no_par: 'This figure has no parallel faces',
+    stmt: (shape, name) => 'Construct the cross-section of the ' + shape + ' ' + H(name) + ' by the plane through points ' + H('M') + ', ' + H('N') + ' and ' + H('K') + '.',
+    fact_edge: (l, e) => H(l) + ' lies on edge ' + H(e),
+    fact_face: (l, f) => H(l) + ' lies in face ' + H(f),
+    report_head: (i, n) => 'Method of traces · polyhedron cross-sections' + (n > 1 ? ' · ' + (i + 1) + ' of ' + n : ''),
+    steps_h: 'Construction steps', no_steps: 'No steps yet.',
+    result: k => 'Cross-section: ' + kindName(k) + '.', alt_fig: 'Drawing', html_title: 'Polyhedron cross-sections'
+  }
+};
+const tr = (k, ...a) => { const v = M[LANG][k]; return typeof v === 'function' ? v(...a) : v; };
+
+
+/* ===== Фигуры ===== */
+const LET = 'ABCDEF';
+const SHAPES = { box: {}, prism3: {}, prism6: {}, pyr3: {}, pyr4: {}, pyr6: {} };
+function finishShape(sh) {
+  const n = sh.V.length;
+  sh.c = sh.V.reduce((s, p) => add(s, p), [0, 0, 0]).map(v => v / n);
+  sh.R = Math.max(...sh.V.map(p => len(sub(p, sh.c))));
+  sh.ed = sh.E.map(([a, b]) => { const d = sub(sh.V[b], sh.V[a]), L = len(d); return { a, b, L, dir: mul(d, 1 / L), name: sh.names[a] + sh.names[b] }; });
+  sh.faces = sh.F.map(f => {
+    const pts = f.vs.map(i => sh.V[i]), p0 = pts[0]; let nn = null;
+    for (let i = 1; i < pts.length && !nn; i++) for (let j = i + 1; j < pts.length; j++) { const c = cross(sub(pts[i], p0), sub(pts[j], p0)); if (len(c) > 1e-6) { nn = unit(c); break; } }
+    const fc = mul(pts.reduce((s, p) => add(s, p), [0, 0, 0]), 1 / pts.length);
+    if (dot(nn, sub(fc, sh.c)) < 0) nn = mul(nn, -1);
+    return { vs: f.vs, name: f.name, n: nn, d: dot(nn, p0), c: fc };
+  });
+  sh.sides = sh.faces.map(f => sh.ed.map((e, i) => i).filter(i => f.vs.includes(sh.ed[i].a) && f.vs.includes(sh.ed[i].b)));
+  sh.par = sh.faces.map((f, i) => sh.faces.map((g, j) => j).filter(j => j !== i && len(cross(f.n, sh.faces[j].n)) < 1e-6 && dot(f.n, sh.faces[j].n) < 0));
+  sh.edgeFaces = sh.ed.map(e => sh.faces.map((f, i) => i).filter(i => sh.faces[i].vs.includes(e.a) && sh.faces[i].vs.includes(e.b)));
+  return sh;
+}
+function makeShape(kind) {
+  const meta = SHAPES[kind];
+  if (kind === 'box') {
+    const a = ri(4, 6), b = ri(3, 5), c = ri(3, 5);
+    return finishShape({
+      kind, name: 'ABCDA1B1C1D1',
+      V: [[0, 0, 0], [a, 0, 0], [a, b, 0], [0, b, 0], [0, 0, c], [a, 0, c], [a, b, c], [0, b, c]],
+      names: ['A', 'B', 'C', 'D', 'A1', 'B1', 'C1', 'D1'],
+      E: [[0, 1], [1, 2], [2, 3], [0, 3], [4, 5], [5, 6], [6, 7], [4, 7], [0, 4], [1, 5], [2, 6], [3, 7]],
+      F: [{ vs: [0, 1, 2, 3], name: 'ABCD' }, { vs: [4, 5, 6, 7], name: 'A1B1C1D1' }, { vs: [0, 1, 5, 4], name: 'ABB1A1' },
+        { vs: [1, 2, 6, 5], name: 'BCC1B1' }, { vs: [2, 3, 7, 6], name: 'CDD1C1' }, { vs: [0, 3, 7, 4], name: 'ADD1A1' }]
+    });
+  }
+  const n = +kind.slice(-1), pyr = kind.startsWith('pyr'), h = pick([4, 4.5, 5]);
+  const r = n === 3 ? pick([2.6, 3, 3.4]) : n === 4 ? pick([2.6, 3]) : pick([2.2, 2.5, 2.8]);
+  const a0 = n === 4 ? Math.PI / 4 : Math.PI / 2;
+  const base = Array.from({ length: n }, (_, i) => { const t = a0 + 2 * Math.PI * i / n; return [r * Math.cos(t), r * Math.sin(t), 0]; });
+  const cyc = o => { const e = []; for (let i = 0; i < n - 1; i++) e.push([o + i, o + i + 1]); e.push([o, o + n - 1]); return e; };
+  const nm = LET.slice(0, n);
+  if (!pyr) {
+    const V = base.concat(base.map(p => [p[0], p[1], h])), names = nm.split('').concat(nm.split('').map(c => c + '1'));
+    const E = cyc(0).concat(cyc(n)); for (let i = 0; i < n; i++) E.push([i, i + n]);
+    const F = [{ vs: base.map((_, i) => i), name: nm }, { vs: base.map((_, i) => i + n), name: nm.split('').map(c => c + '1').join('') }];
+    for (let i = 0; i < n; i++) { const j = (i + 1) % n; F.push({ vs: [i, j, j + n, i + n], name: LET[i] + LET[j] + LET[j] + '1' + LET[i] + '1' }); }
+    return finishShape({ kind, name: nm + nm.split('').map(c => c + '1').join(''), V, names, E, F });
+  }
+  const V = base.concat([[0, 0, h]]), names = nm.split('').concat(['S']);
+  const E = cyc(0); for (let i = 0; i < n; i++) E.push([n, i]);
+  const F = [{ vs: base.map((_, i) => i), name: nm }];
+  for (let i = 0; i < n; i++) F.push({ vs: [i, (i + 1) % n, n], name: 'S' + LET[i] + LET[(i + 1) % n] });
+  return finishShape({ kind, name: 'S' + nm, V, names, E, F });
+}
+const hasPar = D => D.par.some(a => a.length > 0);
+
+/* ===== Грани и точки ===== */
+const inFace = (D, p, f) => Math.abs(dot(D.faces[f].n, p) - D.faces[f].d) < 1e-6;
+const facesOf = (D, p) => D.faces.map((_, i) => i).filter(i => inFace(D, p, i));
+const commonFaces = (D, p, q) => facesOf(D, p).filter(f => inFace(D, q, f));
+const faceName = (D, f) => D.faces[f].name;
+/* ребро, на котором лежит точка (или -1) */
+function edgeOfPoint(D, p) {
+  for (let i = 0; i < D.ed.length; i++) {
+    const e = D.ed[i], A = D.V[e.a], w = sub(p, A);
+    if (len(cross(w, e.dir)) < 1e-6) { const u = dot(w, e.dir); if (u > -1e-6 && u < e.L + 1e-6) return i; }
+  }
+  return -1;
+}
+
+/* ===== Вид: поворот и ортогональная проекция ===== */
+function makeView(D, yaw, pitch, U) {
+  const c = D.c, cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+  const rot = q => {
+    const x = q[0] - c[0], y = q[1] - c[1], z = q[2] - c[2], x1 = x * cy - y * sy, y1 = x * sy + y * cy;
+    return [x1, y1 * cp - z * sp, y1 * sp + z * cp];
+  };
+  const v = [-sy * cp, -cy * cp, sp]; /* направление на наблюдателя в координатах фигуры */
+  return { U, v, P: q => { const r = rot(q); return [r[0] * U, -r[2] * U]; }, faceVisible: f => dot(D.faces[f].n, v) > 1e-9 };
+}
+/* Закрыта ли точка X самой фигурой (луч от X к наблюдателю проходит через её внутренность) */
+function occluded(D, X, v) {
+  let lo = 0, hi = Infinity;
+  for (const f of D.faces) {
+    const a = dot(f.n, v), b = f.d - dot(f.n, X);
+    if (Math.abs(a) < 1e-9) { if (b < 1e-6) return false; continue; }
+    if (a > 0) hi = Math.min(hi, b / a); else lo = Math.max(lo, b / a);
+  }
+  return hi - lo > 1e-6;
+}
+
+/* ===== Рёбра как прямые ===== */
+const getExt = (S, id) => S.edgeExt[id] || [0, S.D.ed[+id.slice(1)].L];
+const edgePt = (D, id, t) => { const e = D.ed[+id.slice(1)]; return add(D.V[e.a], mul(e.dir, t)); };
+const edgeNameById = (D, id) => D.ed[+id.slice(1)].name;
+const edgeVname = (D, id, end) => { const e = D.ed[+id.slice(1)]; return D.names[end === 'hi' ? e.b : e.a]; };
+
+/* ===== Прямые в плоскости грани ===== */
+function mkLine(D, f, p0, dv) {
+  let d = unit(dv);
+  for (let i = 0; i < 3; i++) { if (Math.abs(d[i]) > 1e-9) { if (d[i] < 0) d = mul(d, -1); break; } }
+  const q = sub(p0, mul(d, dot(p0, d)));
+  return { key: f + '|' + d.map(rnd).join(',') + '|' + q.map(rnd).join(','), f, p0: p0.slice(), d };
+}
+const lineParam = (L, X) => dot(sub(X, L.p0), L.d);
+const linePt = (L, t) => add(L.p0, mul(L.d, t));
+
+/* Точки пересечения прямой с прямыми, содержащими стороны этой грани (рёбра и их продолжения) */
+function hotspots(D, L) {
+  const res = [], seen = new Set();
+  for (const ei of D.sides[L.f]) {
+    const e = D.ed[ei], A = D.V[e.a], cr = cross(L.d, e.dir), cc = dot(cr, cr);
+    if (cc < 1e-9) continue;
+    const u = dot(cross(sub(A, L.p0), L.d), cr) / cc, p = add(A, mul(e.dir, u)), k = pkey(p);
+    if (seen.has(k)) continue; seen.add(k);
+    res.push({ p, key: k, edgeIdx: ei, edgeId: 'e' + ei, u });
+  }
+  return res;
+}
+function edgeWhere(D, edgeIdx, u) {
+  const e = D.ed[edgeIdx];
+  if (u < -EPS) return { on: false, v: D.names[e.a], name: e.name };
+  if (u > e.L + EPS) return { on: false, v: D.names[e.b], name: e.name };
+  return { on: true, v: null, name: e.name };
+}
+
+/* ===== Истинное сечение ===== */
+function sectionVerts(D, P3) {
+  const [P, Q, R] = P3, nn = cross(sub(Q, P), sub(R, P));
+  if (len(nn) < EPS) return [];
+  const n = unit(nn), d0 = dot(n, P), res = new Map();
+  for (const e of D.ed) {
+    const A = D.V[e.a], B = D.V[e.b], da = dot(n, A) - d0, db = dot(n, B) - d0;
+    if (Math.abs(da) < 1e-7) res.set(pkey(A), A);
+    if (Math.abs(db) < 1e-7) res.set(pkey(B), B);
+    if (da * db < -1e-12 && Math.abs(da) >= 1e-7 && Math.abs(db) >= 1e-7) { const p = add(A, mul(sub(B, A), da / (da - db))); res.set(pkey(p), p); }
+  }
+  return [...res.values()];
+}
+function orderPoly(vs, P3) {
+  const n = unit(cross(sub(P3[1], P3[0]), sub(P3[2], P3[0])));
+  const c = mul(vs.reduce((s, p) => add(s, p), [0, 0, 0]), 1 / vs.length);
+  const e1 = unit(sub(vs[0], c)), e2 = cross(n, e1);
+  return vs.map(p => { const w = sub(p, c); return { p, a: Math.atan2(dot(w, e2), dot(w, e1)) }; }).sort((x, y) => x.a - y.a).map(o => o.p);
+}
+const NGON = { 3: 'tri', 5: 'pent', 6: 'hex', 7: 'hept', 8: 'oct' };
+function polyKind(poly) {
+  const n = poly.length;
+  if (n !== 4) return NGON[n] || 'poly';
+  const s = i => sub(poly[(i + 1) % 4], poly[i]);
+  const par = (a, b) => len(cross(a, b)) < 1e-6, perp = (a, b) => Math.abs(dot(a, b)) < 1e-6, eqL = (a, b) => Math.abs(len(a) - len(b)) < 1e-6;
+  const p1 = par(s(0), s(2)), p2 = par(s(1), s(3));
+  if (p1 && p2) {
+    const right = perp(s(0), s(1)), rh = eqL(s(0), s(1));
+    return right && rh ? 'square' : right ? 'rect' : rh ? 'rhombus' : 'para';
+  }
+  if (p1 || p2) {
+    const base = p1 ? s(0) : s(1), legA = p1 ? s(1) : s(2), legB = p1 ? s(3) : s(0);
+    if (eqL(legA, legB)) return 'isoTrap';
+    if (perp(legA, base) || perp(legB, base)) return 'rightTrap';
+    return 'trap';
+  }
+  return 'quad';
+}
+
+/* ===== Решатель: какие точки можно получить ===== */
+function solve(D, init, opts) {
+  const allowed = opts.allowed, maxDepth = opts.maxDepth || 5, targets = opts.targets || [];
+  const pts = new Map(), lines = new Map();
+  /* «естественные» грани точки: точка, найденная на прямой ребра, считается лежащей только в гранях этого ребра,
+     даже если случайно (симметрия фигуры) лежит и в плоскости другой грани */
+  const isV = p => D.V.some(v => len(sub(v, p)) < 1e-6);
+  const natOf = (p, ei) => (ei === undefined || ei === null || isV(p)) ? null : D.edgeFaces[ei];
+  const okF = (E, f) => !E.nat || E.nat.includes(f);
+  for (const p of init.points) { const k = pkey(p); pts.set(k, { p, depth: 0, src: null, nat: natOf(p, init.edgeOf && init.edgeOf.get(k)) }); }
+  for (const l of init.lines) lines.set(l.key, { line: l, depth: 0, src: null });
+  const processLine = (L, depth) => {
+    for (const h of hotspots(D, L.line)) if (!pts.has(h.key) && allowed(h.p)) pts.set(h.key, { p: h.p, depth, src: L.line.key, nat: natOf(h.p, h.edgeIdx) });
+  };
+  for (const L of lines.values()) processLine(L, 1);
+  const done = () => targets.every(t => pts.has(t));
+  let r = 1;
+  while (r <= maxDepth && !done()) {
+    const plist = [...pts.values()], llist = [...lines.values()], fresh = [];
+    for (let i = 0; i < plist.length; i++) for (let j = i + 1; j < plist.length; j++) {
+      const a = plist[i], b = plist[j], cf = commonFaces(D, a.p, b.p);
+      if (cf.length !== 1 || !okF(a, cf[0]) || !okF(b, cf[0])) continue;
+      const l = mkLine(D, cf[0], a.p, sub(b.p, a.p));
+      if (lines.has(l.key)) continue;
+      const E = { line: l, depth: r, src: { kind: 'pair', a: pkey(a.p), b: pkey(b.p) } };
+      lines.set(l.key, E); fresh.push(E);
+    }
+    for (const L of llist) for (const g of D.par[L.line.f]) for (const P of plist) {
+      if (!inFace(D, P.p, g) || !okF(P, g)) continue;
+      const l = mkLine(D, g, P.p, L.line.d);
+      if (lines.has(l.key)) continue;
+      const E = { line: l, depth: r, src: { kind: 'par', from: L.line.key, p: pkey(P.p) } };
+      lines.set(l.key, E); fresh.push(E);
+    }
+    if (!fresh.length) break;
+    for (const E of fresh) processLine(E, r);
+    r++;
+  }
+  return { pts, lines };
+}
+function usedPoints(sol, targetKeys) {
+  const set = new Set(), seenL = new Set();
+  const visitP = k => { if (set.has(k)) return; set.add(k); const e = sol.pts.get(k); if (e && e.src) visitL(e.src); };
+  const visitL = lk => {
+    if (seenL.has(lk)) return; seenL.add(lk);
+    const L = sol.lines.get(lk); if (!L || !L.src) return;
+    if (L.src.kind === 'pair') { visitP(L.src.a); visitP(L.src.b); } else { visitL(L.src.from); visitP(L.src.p); }
+  };
+  targetKeys.forEach(visitP);
+  return set;
+}
+
+/* ===== Генерация задачи ===== */
+function randEdgePoint(D) {
+  const e = pick(D.ed); return add(D.V[e.a], mul(e.dir, e.L * pick([0.25, 1 / 3, 0.5, 2 / 3, 0.75])));
+}
+function randFacePoint(D) {
+  const f = pick(D.faces), w = f.vs.map(() => pick([1, 2, 3])), s = w.reduce((a, b) => a + b, 0);
+  return f.vs.reduce((p, vi, i) => add(p, mul(D.V[vi], w[i] / s)), [0, 0, 0]);
+}
+function limitR(task, wide) { return wide ? task.Rmax : task.R - 0.85; }
+function makeAllowed(task, wide) {
+  const c = task.D.c, R = limitR(task, wide);
+  return p => len(sub(p, c)) <= R;
+}
+function genTask(kind, level) {
+  for (let attempt = 0; attempt < 6000; attempt++) {
+    const D = makeShape(kind), c = D.c;
+    const nFace = level === 'faces' ? ri(1, 2) : 0, given = [];
+    /* шестиугольная призма: чуть чаще все три точки на боковых рёбрах */
+    const lat = kind === 'prism6' && level === 'edges' && Math.random() < 0.35 ? D.ed.filter(e => Math.abs(e.dir[2]) > 0.99) : null;
+    for (let i = 0; i < 3; i++) {
+      if (lat) { const e = pick(lat); given.push(add(D.V[e.a], mul(e.dir, e.L * pick([0.25, 1 / 3, 0.5, 2 / 3, 0.75])))); }
+      else given.push(i < nFace ? randFacePoint(D) : randEdgePoint(D));
+    }
+    if (new Set(given.map(pkey)).size < 3) continue;
+    if (len(cross(sub(given[1], given[0]), sub(given[2], given[0]))) < 1e-3) continue;
+    if (D.faces.some((f, i) => given.every(p => inFace(D, p, i)))) continue;
+    if (given.some(p => D.V.some(v => len(sub(v, p)) < 1e-3))) continue;
+    for (let i = 2; i > 0; i--) { const j = ri(0, i);[given[i], given[j]] = [given[j], given[i]]; }
+    const Vraw = sectionVerts(D, given);
+    if (Vraw.length < 3) continue;
+    const poly = orderPoly(Vraw, given), V = poly.map(pkey);
+    const gset = new Set(given.map(pkey)), targets = V.filter(k => !gset.has(k));
+    if (!targets.length) continue;
+    const Rbox = D.R, big = p => len(sub(p, c)) <= 3 * Rbox;
+    const sol = solve(D, { points: given, lines: [] }, { allowed: big, maxDepth: 4, targets });
+    if (!targets.every(t => sol.pts.has(t))) continue;
+    let depthMax = 0; targets.forEach(t => { depthMax = Math.max(depthMax, sol.pts.get(t).depth); });
+    const used = usedPoints(sol, targets);
+    /* две разные точки ближе 10% длины ребра (в том числе точка и вершина) трудно различить и выбрать — такие задачи пропускаем */
+    const meanL = D.ed.reduce((s, e) => s + e.L, 0) / D.ed.length, mind = 0.10 * meanL;
+    const cp = []; used.forEach(k => cp.push(sol.pts.get(k).p)); given.forEach(p => cp.push(p));
+    const all = cp.concat(D.V);
+    let tooNear = false;
+    for (let a = 0; a < cp.length && !tooNear; a++) for (let b = a + 1; b < all.length; b++) {
+      const d = len(sub(cp[a], all[b])); if (d > 1e-3 && d < mind) { tooNear = true; break; }
+    }
+    if (tooNear) continue;
+    let Rm = Rbox;
+    used.forEach(k => { Rm = Math.max(Rm, len(sub(k.split(',').map(Number), c))); });
+    given.forEach(p => { Rm = Math.max(Rm, len(sub(p, c))); });
+    const R = Rm + 0.9;
+    if (R / (Rbox + 0.9) > 1.85) continue;
+    const task = { D, given, V, poly, depth: depthMax, R, Rmax: Math.max(3.2 * Rbox, R + 2), level, shape: kind, kind: polyKind(poly) };
+    const sol2 = solve(D, { points: given, lines: [] }, { allowed: makeAllowed(task), maxDepth: 5, targets });
+    if (!targets.every(t => sol2.pts.has(t))) continue;
+    return task;
+  }
+  return null;
+}
+
+/* ===== Состояние решения ===== */
+const GIVEN_LABELS = ['M', 'N', 'K'];
+const NEW_LABELS = ['P', 'Q', 'R', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'E', 'F', 'G', 'H', 'L', 'O'];
+function newState(task) {
+  return { D: task.D, points: task.given.map((p, i) => ({ key: pkey(p), p, label: GIVEN_LABELS[i], given: true })), lines: [], edgeExt: {}, nLabel: 0, log: [], done: false };
+}
+const ptOf = (S, k) => S.points.find(p => p.key === k);
+
+function drawPair(S, ka, kb) {
+  const A = ptOf(S, ka), B = ptOf(S, kb), D = S.D;
+  const cf = commonFaces(D, A.p, B.p);
+  if (cf.length === 0) return { ok: false, msg: () => tr('err_noface', A.label, B.label) };
+  if (cf.length > 1) return { ok: false, msg: () => tr('err_sameedge', A.label, B.label) };
+  const f = cf[0], line = mkLine(D, f, A.p, sub(B.p, A.p));
+  const ex = S.lines.find(l => l.key === line.key), L = ex || line;
+  const tA = lineParam(L, A.p), tB = lineParam(L, B.p), c0 = Math.min(tA, tB), c1 = Math.max(tA, tB);
+  if (ex) {
+    const had = ex.core[0] <= c0 + TOL && ex.core[1] >= c1 - TOL;
+    ex.core = [Math.min(ex.core[0], c0), Math.max(ex.core[1], c1)]; ex.lo = Math.min(ex.lo, ex.core[0]); ex.hi = Math.max(ex.hi, ex.core[1]);
+    return { ok: true, again: had, f, line: ex };
+  }
+  line.core = [c0, c1]; line.lo = c0; line.hi = c1;
+  line.src = { kind: 'pair', a: ka, b: kb };
+  line.lab = { t: 'seg', n: A.label + B.label };
+  S.lines.push(line);
+  S.log.push({ k: 'seg', n: A.label + B.label, plane: A.on === false || B.on === false, f: faceName(D, f) });
+  return { ok: true, f, line };
+}
+function drawPar(S, lk, kp) {
+  const D = S.D, L = S.lines.find(l => l.key === lk), P = ptOf(S, kp), gs = D.par[L.f];
+  if (!gs.length) return { ok: false, msg: () => tr('err_par_noface', faceName(D, L.f)) };
+  const g = gs.find(g => inFace(D, P.p, g));
+  if (g === undefined) return { ok: false, msg: () => tr('err_par_notin', P.label, faceName(D, gs[0]), faceName(D, L.f)) };
+  const line = mkLine(D, g, P.p, L.d);
+  const ex = S.lines.find(l => l.key === line.key);
+  if (ex) return { ok: true, again: true, f: g, line: ex };
+  line.core = [0, 0]; line.lo = -1; line.hi = 1;
+  line.src = { kind: 'par', from: lk, p: kp };
+  line.lab = { t: 'par', n: P.label };
+  S.lines.push(line);
+  S.log.push({ k: 'par', p: P.label, f: faceName(D, g), ref: L.lab });
+  return { ok: true, f: g, line };
+}
+
+/* Точки пересечения, доступные сейчас: оба продолжения уже дотянуты до места встречи */
+function crossingsOf(S, task) {
+  const D = S.D, al = makeAllowed(task, true), res = [], seen = new Set();
+  for (const L of S.lines) for (const h of hotspots(D, L)) {
+    if (seen.has(h.key) || !al(h.p) || S.points.some(p => p.key === h.key)) continue;
+    const tL = lineParam(L, h.p); if (tL < L.lo - TOL || tL > L.hi + TOL) continue;
+    const ext = getExt(S, h.edgeId); if (h.u < ext[0] - TOL || h.u > ext[1] + TOL) continue;
+    seen.add(h.key); res.push({ p: h.p, key: h.key, edgeIdx: h.edgeIdx, u: h.u, edgeId: h.edgeId, line: L });
+  }
+  return res;
+}
+function addCrossing(S, task, key) {
+  const c = crossingsOf(S, task).find(c => c.key === key);
+  if (!c) return { ok: false, msg: '' };
+  const vi = S.D.V.findIndex(v => len(sub(v, c.p)) < 1e-6), w = edgeWhere(S.D, c.edgeIdx, c.u);
+  const label = vi >= 0 ? S.D.names[vi] : (NEW_LABELS[S.nLabel++] || ('T' + S.nLabel));
+  S.points.push({ key, p: c.p, label, given: false, on: w.on, edgeIdx: c.edgeIdx });
+  S.log.push({ k: 'cross', l: label, via: c.line.lab, edge: w.name, w });
+  return { ok: true, label, where: w, line: c.line };
+}
+function isComplete(S, task) { return task.V.every(k => S.points.some(p => p.key === k)); }
+
+/* ===== Вытягивание лучей ===== */
+/* Что можно потянуть, начав движение из точки P (точка построения или вершина) */
+function pullCands(S, P) {
+  const D = S.D, res = [];
+  for (const L of S.lines) {
+    if (Math.abs(L.lo - L.core[0]) < 1e-9 && len(sub(linePt(L, L.core[0]), P)) < EPS) res.push({ kind: 'line', key: L.key, end: 'lo', dir: mul(L.d, -1) });
+    if (Math.abs(L.hi - L.core[1]) < 1e-9 && len(sub(linePt(L, L.core[1]), P)) < EPS) res.push({ kind: 'line', key: L.key, end: 'hi', dir: L.d.slice() });
+  }
+  D.V.forEach((v, vi) => {
+    if (len(sub(v, P)) > EPS) return;
+    D.ed.forEach((e, ei) => {
+      const id = 'e' + ei, ex = getExt(S, id);
+      if (e.a === vi && Math.abs(ex[0]) < 1e-9) res.push({ kind: 'edge', id, end: 'lo', dir: mul(e.dir, -1) });
+      else if (e.b === vi && Math.abs(ex[1] - e.L) < 1e-9) res.push({ kind: 'edge', id, end: 'hi', dir: e.dir.slice() });
+    });
+  });
+  return res;
+}
+/* Параметрическое представление тянущегося конца: p(t) = a + t*b */
+function endFrame(S, g) {
+  if (g.kind === 'line') { const L = S.lines.find(l => l.key === g.key); return { a: L.p0, b: L.d, min: L.core[0], max: L.core[1] }; }
+  const e = S.D.ed[+g.id.slice(1)];
+  return { a: S.D.V[e.a], b: e.dir, min: 0, max: e.L };
+}
+function endPos(S, g) {
+  const fr = endFrame(S, g);
+  let t;
+  if (g.kind === 'line') { const L = S.lines.find(l => l.key === g.key); t = g.end === 'hi' ? L.hi : L.lo; }
+  else { const ex = getExt(S, g.id); t = g.end === 'hi' ? ex[1] : ex[0]; }
+  return add(fr.a, mul(fr.b, t));
+}
+function setEnd(S, g, t) {
+  if (g.kind === 'line') {
+    const L = S.lines.find(l => l.key === g.key);
+    if (g.end === 'hi') L.hi = Math.max(t, L.core[1]); else L.lo = Math.min(t, L.core[0]);
+  } else {
+    const Le = S.D.ed[+g.id.slice(1)].L, ex = getExt(S, g.id).slice();
+    if (g.end === 'hi') ex[1] = Math.max(t, Le); else ex[0] = Math.min(t, 0);
+    if (Math.abs(ex[0]) < 1e-9 && Math.abs(ex[1] - Le) < 1e-9) delete S.edgeExt[g.id]; else S.edgeExt[g.id] = ex;
+  }
+}
+
+/* ===== Подсказки ===== */
+function hintAction(S, task) {
+  const missing = task.V.filter(k => !S.points.some(p => p.key === k));
+  if (!missing.length) return null;
+  const sol = solve(S.D, { points: S.points.map(p => p.p), lines: S.lines, edgeOf: new Map(S.points.filter(p => p.edgeIdx !== undefined && !p.given).map(p => [p.key, p.edgeIdx])) }, { allowed: makeAllowed(task), maxDepth: 6, targets: missing });
+  let best = null;
+  for (const k of missing) { const e = sol.pts.get(k); if (e && (!best || e.depth < best.depth)) best = { k, depth: e.depth }; }
+  if (!best) return null;
+  const hasP = k => S.points.some(p => p.key === k), hasL = k => S.lines.some(l => l.key === k);
+  function nextPoint(tk) {
+    const lk = sol.pts.get(tk).src, act = ensureLine(lk);
+    return act || extendOrPick(lk, tk);
+  }
+  function extendOrPick(lk, tk) {
+    const L = S.lines.find(l => l.key === lk), h = hotspots(S.D, L).find(h => h.key === tk);
+    const tL = lineParam(L, h.p), ext = getExt(S, h.edgeId);
+    if (tL > L.hi + TOL) return { type: 'extend', kind: 'line', key: lk, end: 'hi', target: tk, edgeId: h.edgeId };
+    if (tL < L.lo - TOL) return { type: 'extend', kind: 'line', key: lk, end: 'lo', target: tk, edgeId: h.edgeId };
+    if (h.u > ext[1] + TOL) return { type: 'extend', kind: 'edge', id: h.edgeId, end: 'hi', target: tk, line: lk };
+    if (h.u < ext[0] - TOL) return { type: 'extend', kind: 'edge', id: h.edgeId, end: 'lo', target: tk, line: lk };
+    return { type: 'pick', target: tk, line: lk };
+  }
+  function ensureLine(lk) {
+    if (hasL(lk)) return null;
+    const s = sol.lines.get(lk).src;
+    if (s.kind === 'pair') {
+      for (const k of [s.a, s.b]) if (!hasP(k)) return nextPoint(k);
+      return { type: 'draw', a: s.a, b: s.b };
+    }
+    const act = ensureLine(s.from); if (act) return act;
+    if (!hasP(s.p)) return nextPoint(s.p);
+    return { type: 'par', from: s.from, p: s.p };
+  }
+  return nextPoint(best.k);
+}
+
+if (typeof module !== 'undefined') module.exports = {
+  EPS, TOL, SHAPES, pkey, sub, add, mul, dot, cross, len, makeShape, hasPar, inFace, facesOf, commonFaces, faceName, edgeOfPoint, makeView, occluded,
+  getExt, edgePt, edgeNameById, edgeVname, mkLine, lineParam, linePt, hotspots, edgeWhere, sectionVerts, orderPoly, polyKind, solve, usedPoints,
+  genTask, limitR, makeAllowed, newState, ptOf, drawPair, drawPar, crossingsOf, addCrossing, isComplete, pullCands, endFrame, endPos, setEnd, hintAction,
+  GIVEN_LABELS, H, setLang, tr, shapeTitle, shapeLabel, kindName, kindArt, lineNom, lineAcc, lineShort, lineCross, lineFrom, whereText, logHtml
+};
+
+</script>
+<script>
+(function () {
+  'use strict';
+  const $ = id => document.getElementById(id);
+  /* Значок вкладки: переносим ссылку в head (в опубликованной странице она оказывается в body) и делаем PNG-копию для браузеров без SVG-значков */
+  (function favicon() {
+    try {
+      const old = document.querySelector('link[rel~="icon"]'); if (!old) return;
+      const href = old.getAttribute('href'), mk = (h, t) => { document.querySelectorAll('link[rel~="icon"]').forEach(e => e.remove()); const l = document.createElement('link'); l.rel = 'icon'; l.type = t; l.href = h; document.head.appendChild(l); };
+      mk(href, 'image/svg+xml');
+      const im = new Image();
+      im.onload = () => { try { const c = document.createElement('canvas'); c.width = c.height = 64; c.getContext('2d').drawImage(im, 0, 0, 64, 64); mk(c.toDataURL('image/png'), 'image/png'); } catch (e) { /* остаётся SVG */ } };
+      im.src = href;
+    } catch (e) { /* без значка */ }
+  })();
+  const svg = $('fig');
+  const LS = 'sections.parallelepiped.score';
+  const VW = 760, DEF = { yaw: -0.5, pitch: 0.42, zoom: 1, px: 26, py: 0 };
+  const narrow = window.matchMedia ? window.matchMedia('(max-width: 640px)') : { matches: false };
+  let VH = narrow.matches ? 640 : 500;
+  svg.style.aspectRatio = VW + ' / ' + VH;
+  if (narrow.addEventListener) narrow.addEventListener('change', () => { VH = narrow.matches ? 640 : 500; svg.style.aspectRatio = VW + ' / ' + VH; if (S) render(); });
+  const START = () => tr('start');
+  let TASK, S, mode = 'seg', sel = [], parLine = null, msg = START, hint = null, hist = [], level = 'edges', shape = 'box', score = 0, usedHint = false;
+  let view = Object.assign({}, DEF), drag = null, cur = null;
+  /* Подсказки внизу нужны, пока ученик не сделал каждый шаг метода по разу; потом только по кнопке «Подсказка» */
+  const learn = { seg: false, cross: false, ext: false, par: false };
+  const quiet = () => learn.seg && learn.cross && learn.ext && (learn.par || !(TASK && hasPar(TASK.D)));
+  const tell = t => { msg = quiet() ? '' : t; };
+  try { score = parseInt(localStorage.getItem(LS), 10) || 0; } catch (e) { }
+  try { setLang((localStorage.getItem('trainers.lang') || localStorage.getItem('sections.lang')) === 'en' ? 'en' : 'ru'); } catch (e) { }
+
+  const svgName = n => n.replace(/(\d+)/g, '<tspan dy="0.32em" font-size="68%" font-style="normal">$1</tspan>');
+  const f1 = n => (Math.round(n * 10) / 10).toString();
+  const parseKey = s => s.split(',').map(Number);
+
+  function newTask() {
+    let t = null; while (!t) t = genTask(shape, level);
+    TASK = t; S = newState(t); mode = 'seg'; sel = []; parLine = null; hint = null; hist = []; usedHint = false; tell(START);
+    view = Object.assign({}, DEF);
+    renderTask(); render();
+  }
+  function pushHist() { hist.push(JSON.stringify(S)); if (hist.length > 80) hist.shift(); }
+  function clearAux() { sel = []; parLine = null; hint = null; }
+
+  const STAT = {
+    ru: {
+      home: '← Все тренажёры', c_name: 'Руслан Владимирович Куцов', c_vk: 'ВКонтакте', c_profi: 'Профи.ру',
+      eyebrow: 'Метод следов', h1: 'Сечения многогранников', score: 'Очки', new: 'Новое сечение', shape: 'Фигура', pos: 'Положение точек',
+      pos_edges: 'на рёбрах', pos_faces: 'на рёбрах и в гранях', done: 'Готово',
+      vhint: 'Тяните за фон, чтобы вращать фигуру. Тяните за точку, конец отрезка или вершину, чтобы вытянуть луч.',
+      lg_given: 'заданная точка', lg_vertex: 'вершина сечения на ребре', lg_trace: 'точка вне ребра (след)', lg_cross: 'точка пересечения (показана в подсказке)',
+      lg_tip: 'конец луча: тяните, чтобы менять длину', lg_hidden: 'невидимые линии', steps_h: 'Ход построения', clear: 'очистить', steps_empty: 'Здесь появятся ваши шаги.',
+      rep_add: 'Добавить в файл', rep_add_t: 'Добавить это построение в файл, чтобы потом сохранить несколько построений вместе', pdf_t: 'Сохранить в PDF', html_t: 'Сохранить как HTML-файл',
+      t_seg: 'Отрезок через две точки', t_par: 'Параллельная прямая', t_hint: 'Подсказка', t_undo: 'Отменить шаг', t_zin: 'Увеличить', t_zout: 'Уменьшить',
+      t_up: 'Сдвинуть вверх', t_left: 'Сдвинуть влево', t_right: 'Сдвинуть вправо', t_down: 'Сдвинуть вниз', t_vreset: 'Вид по умолчанию',
+      t_reset: 'Сначала', t_reset_a: 'Начать построение сначала', g_tools: 'Инструменты', g_build: 'Построение', g_zoom: 'Масштаб', g_pan: 'Сдвиг картинки',
+      fig_a: 'Чертёж многогранника', sec_task: 'Условие', sec_board: 'Построение'
+    },
+    en: {
+      home: '← All trainers', c_name: 'Ruslan Kutsov, PhD', c_vk: 'VK', c_profi: 'Profi.ru',
+      eyebrow: 'Method of traces', h1: 'Polyhedron cross-sections', score: 'Score', new: 'New cross-section', shape: 'Shape', pos: 'Point positions',
+      pos_edges: 'on edges', pos_faces: 'on edges and in faces', done: 'Done',
+      vhint: 'Drag the background to rotate the figure. Drag a point, a segment end or a vertex to pull out a ray.',
+      lg_given: 'given point', lg_vertex: 'section vertex on an edge', lg_trace: 'point off the edge (trace)', lg_cross: 'intersection point (shown in the hint)',
+      lg_tip: 'ray end: drag to change its length', lg_hidden: 'hidden lines', steps_h: 'Construction steps', clear: 'clear', steps_empty: 'Your steps will appear here.',
+      rep_add: 'Add to file', rep_add_t: 'Add this construction to the file so several constructions can be saved together', pdf_t: 'Save as PDF', html_t: 'Save as HTML file',
+      t_seg: 'Segment through two points', t_par: 'Parallel line', t_hint: 'Hint', t_undo: 'Undo step', t_zin: 'Zoom in', t_zout: 'Zoom out',
+      t_up: 'Move up', t_left: 'Move left', t_right: 'Move right', t_down: 'Move down', t_vreset: 'Default view',
+      t_reset: 'Start over', t_reset_a: 'Start the construction over', g_tools: 'Tools', g_build: 'Construction', g_zoom: 'Zoom', g_pan: 'Move the picture',
+      fig_a: 'Polyhedron drawing', sec_task: 'Problem', sec_board: 'Construction'
+    }
+  };
+  function applyStatic() {
+    const d = STAT[LANG];
+    document.querySelectorAll('[data-i18n]').forEach(e => { e.textContent = d[e.getAttribute('data-i18n')]; });
+    document.querySelectorAll('[data-i18n-title]').forEach(e => { e.title = d[e.getAttribute('data-i18n-title')]; });
+    document.querySelectorAll('[data-i18n-aria]').forEach(e => { e.setAttribute('aria-label', d[e.getAttribute('data-i18n-aria')]); });
+    document.documentElement.lang = LANG;
+    $('lang-ru').setAttribute('aria-pressed', LANG === 'ru'); $('lang-en').setAttribute('aria-pressed', LANG === 'en');
+    $('shape').innerHTML = Object.keys(SHAPES).map(k => '<option value="' + k + '">' + shapeLabel(k) + '</option>').join('');
+    $('shape').value = shape; $('level').value = level;
+  }
+  const givenFacts = () => TASK.given.map((p, i) => {
+    const ei = edgeOfPoint(TASK.D, p);
+    return ei >= 0 ? { lb: GIVEN_LABELS[i], edge: TASK.D.ed[ei].name } : { lb: GIVEN_LABELS[i], face: faceName(TASK.D, facesOf(TASK.D, p)[0]) };
+  });
+  const stmtHtml = (kind, name) => tr('stmt', shapeTitle(kind), name);
+  const factsHtml = fs => fs.map(f => '<li>' + (f.edge ? tr('fact_edge', f.lb, f.edge) : tr('fact_face', f.lb, f.face)) + '</li>').join('');
+  function renderTask() {
+    const D = TASK.D;
+    $('stmt').innerHTML = stmtHtml(D.kind, D.name);
+    $('facts').innerHTML = factsHtml(givenFacts());
+    $('level').value = level; $('shape').value = shape;
+  }
+  function setLanguage(l) {
+    setLang(l); try { localStorage.setItem('trainers.lang', LANG); } catch (e) { }
+    applyStatic(); renderTask(); reportUi(); render();
+  }
+
+  function render() {
+    const D = TASK.D, z = view.zoom, vb = { x: -(VW / 2 + view.px) / z, y: -(VH / 2 + view.py) / z, w: VW / z, h: VH / z };
+    svg.setAttribute('viewBox', [vb.x, vb.y, vb.w, vb.h].map(f1).join(' '));
+    const rect = svg.getBoundingClientRect();
+    const k = Math.min(2.8, Math.max(0.7, vb.w / Math.max(rect.width, 50)));
+    const U = Math.min(VW, VH) / 2 / (TASK.R - 0.35), V = makeView(D, view.yaw, view.pitch, U), P = V.P;
+    cur = { V, P, k, U, vb };
+    const away = (sp, dist) => { const l = Math.hypot(sp[0], sp[1]) || 1; return [sp[0] + sp[0] / l * dist, sp[1] + sp[1] / l * dist]; };
+    const seg = (a, b, cls, sw, dash, extra) => '<line class="' + cls + '" x1="' + f1(a[0]) + '" y1="' + f1(a[1]) + '" x2="' + f1(b[0]) + '" y2="' + f1(b[1]) +
+      '" stroke-width="' + f1(sw) + '"' + (dash ? ' stroke-dasharray="' + dash + '"' : '') + (extra || '') + '/>';
+    const circ = (p, r, cls, sw, extra) => '<circle class="' + cls + '" cx="' + f1(p[0]) + '" cy="' + f1(p[1]) + '" r="' + f1(r) + '"' + (sw ? ' stroke-width="' + f1(sw) + '"' : '') + (extra || '') + '/>';
+    const dashHid = f1(7 * k) + ' ' + f1(5 * k), dashRay = f1(7 * k) + ' ' + f1(4 * k);
+    /* Линия вне параллелепипеда: видимые участки сплошные, закрытые им пунктиром */
+    const pieces = (Xof, tA, tB, cls, sw) => {
+      if (Math.abs(tB - tA) < 1e-9) return '';
+      const N = 36, ts = [], hs = [], hidAt = t => occluded(D, Xof(t), V.v);
+      for (let i = 0; i <= N; i++) { ts.push(tA + (tB - tA) * i / N); hs.push(hidAt(ts[i])); }
+      const piece = (a, b, h) => seg(P(Xof(a)), P(Xof(b)), cls, sw, h ? dashHid : '');
+      let out = '', start = tA, runHid = hs[0];
+      for (let i = 0; i < N; i++) {
+        if (hs[i + 1] === runHid) continue;
+        let a = ts[i], b = ts[i + 1];
+        for (let j = 0; j < 14; j++) { const m = (a + b) / 2; if (hidAt(m) === runHid) a = m; else b = m; }
+        const tt = (a + b) / 2; out += piece(start, tt, runHid); start = tt; runHid = !runHid;
+      }
+      return out + piece(start, tB, runHid);
+    };
+    let vis = '', hitL = '', hitV = '', hitTop = '';
+
+    if (S.done) vis += '<path class="sec-fill" d="M' + TASK.poly.map(p => P(p).map(f1).join(' ')).join(' L') + ' Z"/>';
+
+    /* Рёбра */
+    const hidden = [], visible = [];
+    D.ed.forEach((e, i) => { (D.edgeFaces[i].some(f => V.faceVisible(f)) ? visible : hidden).push([D.V[e.a], D.V[e.b]]); });
+    for (const [a, b] of hidden) vis += seg(P(a), P(b), 'edge', 2 * k, dashHid);
+    for (const [a, b] of visible) vis += seg(P(a), P(b), 'edge', 2.3 * k);
+
+    /* Продолжения рёбер */
+    for (const id of Object.keys(S.edgeExt)) {
+      const Le = D.ed[+id.slice(1)].L, ex = S.edgeExt[id];
+      for (const [end, t, base] of [['lo', ex[0], 0], ['hi', ex[1], Le]]) {
+        if (Math.abs(t - base) < 1e-9) continue;
+        const b = P(edgePt(D, id, t));
+        vis += pieces(q => edgePt(D, id, q), base, t, 'edge ext', 1.3 * k);
+        vis += circ(b, 3.6 * k, 'tip tip-edge', 1.4 * k);
+        hitTop += circ(b, 16 * k, 'hit', 0, ' data-t="tip" data-kind="edge" data-id="' + id + '" data-end="' + end + '"');
+      }
+    }
+
+    /* Отрезки и лучи */
+    for (const L of S.lines) {
+      const at = t => P(linePt(L, t)), c0 = L.core[0], c1 = L.core[1];
+      const hid = !V.faceVisible(L.f), cls = 'cl' + (L.key === parLine ? ' sel' : '');
+      if (c1 - c0 > 1e-9) vis += pieces(q => linePt(L, q), c0, c1, cls, 2.6 * k);
+      for (const [end, t, base] of [['lo', L.lo, c0], ['hi', L.hi, c1]]) {
+        if (Math.abs(t - base) > 1e-9) {
+          vis += pieces(q => linePt(L, q), base, t, cls + ' ray', 2.2 * k);
+          vis += circ(at(t), 3.6 * k, 'tip tip-line', 1.4 * k);
+          hitTop += circ(at(t), 16 * k, 'hit', 0, ' data-t="tip" data-kind="line" data-key="' + L.key + '" data-end="' + end + '"');
+        }
+      }
+      hitL += seg(at(L.lo - 40), at(L.hi + 40), 'hit', 16 * k, '', ' data-t="ln" data-k="' + L.key + '"');
+      if (hint && hint.line === L.key) vis += seg(at(L.lo), at(L.hi), 'ring-hint', 5 * k);
+    }
+
+    /* Сечение */
+    if (S.done) {
+      const n = TASK.poly.length;
+      for (let i = 0; i < n; i++) {
+        const a = TASK.poly[i], b = TASK.poly[(i + 1) % n];
+        vis += seg(P(a), P(b), 'sec-edge', 3.2 * k, commonFaces(D, a, b).some(f => V.faceVisible(f)) ? '' : dashHid);
+      }
+    }
+
+    /* Вершины */
+    const fs = 16 * k;
+    D.V.forEach((q, qi) => {
+      if (S.points.some(p => !p.given && p.key === pkey(q))) { hitV += circ(P(q), 14 * k, 'hit', 0, ' data-t="vx" data-k="' + q.join(',') + '"'); return; }
+      const sp = P(q), lp = away(sp, 21 * k);
+      vis += '<text class="vl" x="' + f1(lp[0]) + '" y="' + f1(lp[1]) + '" text-anchor="middle" dominant-baseline="central" style="font-size:' + f1(fs) + 'px" stroke-width="' + f1(3.5 * k) + '">' + svgName(D.names[qi]) + '</text>';
+      hitV += circ(sp, 14 * k, 'hit', 0, ' data-t="vx" data-k="' + q.join(',') + '"');
+    });
+
+    /* Кольца пересечений */
+    if (hint && hint.hot && crossingsOf(S, TASK).some(c => c.key === hint.hot)) vis += circ(P(parseKey(hint.hot)), 7 * k, 'hot', 2.4 * k);
+
+    /* Подсказка */
+    if (hint) {
+      if (hint.from) vis += circ(P(hint.from), 13 * k, 'ring-hint', 3 * k, ' data-hint="from"');
+      if (hint.to) vis += circ(P(hint.to), 10 * k, 'ring-hint', 3 * k, ' data-hint="to"');
+      if (hint.hot) vis += circ(P(parseKey(hint.hot)), 13 * k, 'ring-hint', 3 * k, ' data-hint="hot"');
+    }
+
+    /* Точки */
+    for (const p of S.points) {
+      const sp = P(p.p), lp = away(sp, 17 * k);
+      const cls = p.given ? 'pt-given' : (p.on ? 'pt-found on' : 'pt-found');
+      if (sel.includes(p.key)) vis += circ(sp, 11 * k, 'ring-sel', 2.6 * k);
+      if (hint && hint.pts && hint.pts.includes(p.key)) vis += circ(sp, 12 * k, 'ring-hint', 3 * k, ' data-hint="pt"');
+      vis += circ(sp, 5.4 * k, cls, 1.5 * k);
+      vis += '<text class="pl" x="' + f1(lp[0]) + '" y="' + f1(lp[1]) + '" text-anchor="middle" dominant-baseline="central" style="font-size:' + f1(fs) + 'px" stroke-width="' + f1(3.5 * k) + '">' + svgName(p.label) + '</text>';
+      hitTop += circ(sp, 16 * k, 'hit', 0, ' data-t="pt" data-k="' + p.key + '" tabindex="0" role="button" aria-label="' + tr('pt_aria', p.label) + '"');
+    }
+
+    svg.innerHTML = '<g>' + hitL + '</g><g>' + hitV + '</g><g pointer-events="none">' + vis + '</g><g>' + hitTop + '</g>';
+
+    $('status').innerHTML = typeof msg === 'function' ? msg() : msg;
+    $('score').textContent = score;
+    $('tool-seg').setAttribute('aria-pressed', mode === 'seg');
+    $('tool-par').setAttribute('aria-pressed', mode === 'par');
+    for (const id of ['tool-seg', 'tool-par', 'hint', 'done']) $(id).disabled = S.done;
+    if (!hasPar(D)) { $('tool-par').disabled = true; $('tool-par').title = tr('no_par'); } else $('tool-par').title = STAT[LANG].t_par;
+    $('undo').disabled = !hist.length || S.done;
+    $('reset').disabled = S.done || (!S.lines.length && S.points.length === 3 && !Object.keys(S.edgeExt).length);
+    $('log').innerHTML = S.log.map(e => '<li>' + logHtml(e) + '</li>').join('');
+    $('log-empty').hidden = S.log.length > 0;
+  }
+
+  /* ---------- Вытягивание лучей ---------- */
+  function chooseCand(P3, dx, dy) {
+    const cands = pullCands(S, P3).map(c => Object.assign({ abs: false }, c)), s0 = cur.P(P3), dl = Math.hypot(dx, dy) || 1, D = S.D;
+    /* уже вытянутые концы в этой же точке (с допуском в несколько пикселей): их можно двигать в обе стороны */
+    const near = X => { const sx = cur.P(X); return Math.hypot(sx[0] - s0[0], sx[1] - s0[1]) < 9 * cur.k; };
+    for (const L of S.lines) for (const [end, t, base] of [['lo', L.lo, L.core[0]], ['hi', L.hi, L.core[1]]]) {
+      if (Math.abs(t - base) > 1e-9 && near(linePt(L, t))) cands.push({ kind: 'line', key: L.key, end, dir: end === 'hi' ? L.d.slice() : L.d.map(v => -v), abs: true });
+    }
+    for (const id of Object.keys(S.edgeExt)) {
+      const ed = D.ed[+id.slice(1)], ex = S.edgeExt[id];
+      for (const [end, t, base] of [['lo', ex[0], 0], ['hi', ex[1], ed.L]]) {
+        if (Math.abs(t - base) < 1e-9 || !near(edgePt(D, id, t))) continue;
+        cands.push({ kind: 'edge', id, end, dir: end === 'hi' ? ed.dir.slice() : mul(ed.dir, -1), abs: true });
+      }
+    }
+    let best = null;
+    for (const c of cands) {
+      const s1 = cur.P(add(P3, c.dir)), vx = s1[0] - s0[0], vy = s1[1] - s0[1], vl = Math.hypot(vx, vy);
+      if (vl < 1e-6) continue;
+      let cs = (vx * dx + vy * dy) / (vl * dl);
+      if (c.abs) cs = Math.abs(cs);
+      if (cs > 0.35 && (!best || cs > best.cs)) best = { c, cs };
+    }
+    return best && { kind: best.c.kind, key: best.c.key, id: best.c.id, end: best.c.end, cs: best.cs };
+  }
+  function toVB(e) {
+    const r = svg.getBoundingClientRect(), vb = cur.vb;
+    return [vb.x + (e.clientX - r.left) * vb.w / r.width, vb.y + (e.clientY - r.top) * vb.h / r.height];
+  }
+  function dragExt(e) {
+    const g = drag.ext, fr = endFrame(S, g), P = cur.P, k = cur.k, q = toVB(e);
+    const s0 = P(fr.a), s1 = P(add(fr.a, fr.b)), sv = [s1[0] - s0[0], s1[1] - s0[1]], d2 = sv[0] * sv[0] + sv[1] * sv[1];
+    if (d2 < 4) return;
+    let t = ((q[0] - s0[0]) * sv[0] + (q[1] - s0[1]) * sv[1]) / d2;
+    const coreEnd = g.end === 'hi' ? fr.max : fr.min, c = S.D.c, Rl = limitR(TASK, true);
+    const at = tt => add(fr.a, fr.b.map(v => v * tt));
+    t = g.end === 'hi' ? Math.max(t, coreEnd) : Math.min(t, coreEnd);
+    if (len(sub(at(t), c)) > Rl) {
+      let lo = coreEnd, hi = t;
+      for (let i = 0; i < 24; i++) { const m = (lo + hi) / 2; if (len(sub(at(m), c)) > Rl) hi = m; else lo = m; }
+      t = lo;
+    }
+    const fz = fitZoom(P(at(t)));
+    if (fz < view.zoom) view.zoom = fz;
+    const pa = P(at(t)), pb = P(at(coreEnd));
+    if (Math.hypot(pa[0] - pb[0], pa[1] - pb[1]) < 8 * k) t = coreEnd;
+    setEnd(S, g, t);
+    render();
+  }
+  function finishExt() {
+    if (hist.length && JSON.stringify(S) === hist[hist.length - 1]) hist.pop();
+    if (Object.keys(S.edgeExt).length) learn.ext = true;
+    tell(() => tr('ext_done'));
+    render();
+  }
+
+  svg.addEventListener('pointerdown', e => {
+    if (e.button) return;
+    const t = e.target.closest && e.target.closest('[data-t]');
+    drag = { type: t ? t.getAttribute('data-t') : 'bg', k: t && t.getAttribute('data-k'), x0: e.clientX, y0: e.clientY, lx: e.clientX, ly: e.clientY, moved: false, ext: null, id: e.pointerId, q0: toVB(e) };
+    if (t && drag.type === 'tip') drag.ext = { kind: t.getAttribute('data-kind'), key: t.getAttribute('data-key'), id: t.getAttribute('data-id'), end: t.getAttribute('data-end') };
+    try { svg.setPointerCapture(e.pointerId); } catch (_) { }
+  });
+  svg.addEventListener('pointermove', e => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+    if (!drag.moved) {
+      if (Math.hypot(dx, dy) < 6) return;
+      drag.moved = true;
+      if (!S.done && drag.ext && drag.type === 'tip') {
+        /* Конец другого луча лежит в этой же точке: если потянули не вдоль него, берём то, что можно вытянуть из этого места */
+        const g = drag.ext, fr = endFrame(S, g), s0 = cur.P(fr.a), s1 = cur.P(add(fr.a, fr.b)), vx = s1[0] - s0[0], vy = s1[1] - s0[1];
+        const cs = Math.abs(vx * dx + vy * dy) / ((Math.hypot(vx, vy) || 1) * (Math.hypot(dx, dy) || 1));
+        { const alt = chooseCand(endPos(S, g), dx, dy); if (alt && (cs < 0.5 || alt.cs > cs + 0.005)) drag.ext = alt; }
+      }
+      if (!S.done && !drag.ext && (drag.type === 'pt' || drag.type === 'vx')) {
+        const P3 = drag.type === 'pt' ? (ptOf(S, drag.k) || {}).p : parseKey(drag.k);
+        if (P3) drag.ext = chooseCand(P3, dx, dy);
+        if (!drag.ext && drag.q0) {
+          const near = S.D.V.concat(S.points.map(p => p.p)).map(p => { const s = cur.P(p); return { p, dd: Math.hypot(s[0] - drag.q0[0], s[1] - drag.q0[1]) }; })
+            .filter(o => o.dd < 18 * cur.k).sort((x, y) => x.dd - y.dd);
+          for (const o of near) { const alt = chooseCand(o.p, dx, dy); if (alt) { drag.ext = alt; break; } }
+        }
+      }
+      if (drag.ext) { if (S.done) drag.ext = null; else { pushHist(); clearAux(); } }
+    }
+    if (drag.ext) dragExt(e);
+    else {
+      view.yaw += (e.clientX - drag.lx) * 0.01;
+      view.pitch = Math.max(-1.45, Math.min(1.45, view.pitch + (e.clientY - drag.ly) * 0.01));
+      render();
+    }
+    drag.lx = e.clientX; drag.ly = e.clientY;
+  });
+  const endDrag = e => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const d = drag; drag = null;
+    if (!d.moved) {
+      if (!S.done && (d.type === 'tip' || d.type === 'bg' || d.type === 'vx' || d.type === 'ln' || d.type === 'pt')) {
+        const q = toVB(e); let best = null;
+        for (const c of crossingsOf(S, TASK)) { const s = cur.P(c.p), dd = Math.hypot(s[0] - q[0], s[1] - q[1]); if (dd < (d.type === 'ln' && mode === 'par' ? 9 : 16) * cur.k && (!best || dd < best.dd)) best = { key: c.key, dd }; }
+        if (best && d.type === 'pt') {
+          const pp = ptOf(S, d.k), sp = pp && cur.P(pp.p), pd = sp ? Math.hypot(sp[0] - q[0], sp[1] - q[1]) : Infinity;
+          if (best.dd >= pd) best = null;
+        }
+        if (best) { click('hot', best.key); return; }
+      }
+      if (d.type !== 'bg' && d.type !== 'tip') click(d.type, d.k);
+      return;
+    }
+    if (d.ext) finishExt();
+  };
+  svg.addEventListener('pointerup', endDrag);
+  svg.addEventListener('pointercancel', endDrag);
+  svg.addEventListener('wheel', e => { e.preventDefault(); zoom(e.deltaY < 0 ? 1.12 : 1 / 1.12); }, { passive: false });
+
+  /* Наибольший масштаб, при котором точка с экранными координатами sp (при масштабе 1) остаётся в поле */
+  function fitZoom(sp) {
+    const lim = (a, s, m) => Math.abs(a) < 1 ? Infinity : (a > 0 ? (m - s) / a : (m + s) / -a);
+    return Math.max(0.3, Math.min(lim(sp[0], view.px, 0.43 * VW), lim(sp[1], view.py, 0.43 * VH)));
+  }
+  function zoom(f) { view.zoom = Math.max(0.3, Math.min(2.6, view.zoom * f)); render(); }
+  $('zoom-in').addEventListener('click', () => zoom(1.25));
+  $('zoom-out').addEventListener('click', () => zoom(1 / 1.25));
+  $('view-reset').addEventListener('click', () => { view = Object.assign({}, DEF); render(); });
+  const pan = (dx, dy) => { view.px = Math.max(-420, Math.min(420, view.px + dx)); view.py = Math.max(-320, Math.min(320, view.py + dy)); render(); };
+  $('pan-left').addEventListener('click', () => pan(-70, 0));
+  $('pan-right').addEventListener('click', () => pan(70, 0));
+  $('pan-up').addEventListener('click', () => pan(0, -60));
+  $('pan-down').addEventListener('click', () => pan(0, 60));
+
+  /* ---------- Клики ---------- */
+  function click(type, k) {
+    if (S.done) return;
+    if (type === 'hot') {
+      pushHist(); const r = addCrossing(S, TASK, k);
+      if (!r.ok) { hist.pop(); return; }
+      clearAux();
+      learn.cross = true;
+      tell(() => tr('crossed', r.label, r.where));
+      render(); return;
+    }
+    if (type === 'vx') { tell(() => tr('vx_hint')); render(); return; }
+    if (type === 'ln') {
+      if (mode === 'par') {
+        const L = S.lines.find(l => l.key === k), gs = S.D.par[L.f];
+        if (!gs.length) { const fn = faceName(S.D, L.f); msg = () => tr('par_pick_noface', fn); render(); return; }
+        parLine = k; sel = [];
+        { const lb = L.lab, g0 = faceName(S.D, gs[0]), f0 = faceName(S.D, L.f); tell(() => tr('par_selected', lb, g0, f0)); }
+        render();
+      }
+      return;
+    }
+    if (type === 'pt') {
+      if (mode === 'seg') {
+        if (sel.includes(k)) { sel = sel.filter(x => x !== k); tell(START); render(); return; }
+        sel.push(k);
+        if (sel.length < 2) { const l0 = ptOf(S, k).label; tell(() => tr('sel_first', l0)); render(); return; }
+        pushHist(); const r = drawPair(S, sel[0], sel[1]); sel = [];
+        if (!r.ok) { hist.pop(); msg = r.msg; }
+        else {
+          hint = null; if (r.again) hist.pop(); else learn.seg = true;
+          { const ag = r.again, lb = r.line.lab, fn = faceName(S.D, r.f); tell(() => tr('seg_done', ag, lb, fn)); }
+        }
+        render(); return;
+      }
+      if (!parLine) { msg = () => tr('par_first'); render(); return; }
+      pushHist(); const r = drawPar(S, parLine, k);
+      if (!r.ok) { hist.pop(); msg = r.msg; }
+      else { parLine = null; hint = null; mode = 'seg'; sel = []; if (r.again) hist.pop(); else learn.par = true; { const lb = r.line.lab, fn = faceName(S.D, r.f); tell(() => tr('par_done', lb, fn)); } }
+      render();
+    }
+  }
+  svg.addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute && e.target.getAttribute('data-t')) {
+      e.preventDefault(); click(e.target.getAttribute('data-t'), e.target.getAttribute('data-k'));
+    }
+  });
+
+  function setMode(m) {
+    if (S.done) return;
+    mode = m; sel = []; parLine = null; hint = null;
+    tell(m === 'seg' ? START : () => tr('mode_par'));
+    render();
+  }
+  $('tool-seg').addEventListener('click', () => setMode('seg'));
+  $('tool-par').addEventListener('click', () => setMode('par'));
+  $('undo').addEventListener('click', () => { if (!hist.length) return; S = JSON.parse(hist.pop()); clearAux(); tell(() => tr('undone')); render(); });
+  $('reset').addEventListener('click', () => { S = newState(TASK); hist = []; clearAux(); tell(START); render(); });
+
+  $('hint').addEventListener('click', () => {
+    const a = hintAction(S, TASK);
+    if (!a) { msg = () => tr('all_found'); render(); return; }
+    usedHint = true; sel = []; parLine = null;
+    if (a.type === 'draw') {
+      mode = 'seg';
+      const A = ptOf(S, a.a), B = ptOf(S, a.b), f = commonFaces(S.D, A.p, B.p)[0];
+      hint = { pts: [a.a, a.b] };
+      const out = [A, B].filter(p => p.on === false).map(p => { const ei = S.D.sides[f].find(i => len(cross(sub(p.p, S.D.V[S.D.ed[i].a]), S.D.ed[i].dir)) < 1e-6); return { l: p.label, e: ei === undefined ? null : S.D.ed[ei].name }; });
+      { const ab = A.label + B.label, fn = faceName(S.D, f); msg = () => tr('hint_draw', ab, fn, out); }
+    } else if (a.type === 'par') {
+      mode = 'par';
+      const L = S.lines.find(l => l.key === a.from), P = ptOf(S, a.p), g = S.D.par[L.f].find(g => inFace(S.D, P.p, g));
+      hint = { pts: [a.p], line: a.from };
+      { const lb = L.lab, pl = P.label, gn = faceName(S.D, g), fn = faceName(S.D, L.f); msg = () => tr('hint_par', lb, pl, gn, fn); }
+    } else if (a.type === 'extend') {
+      mode = 'seg';
+      const g = { kind: a.kind, key: a.key, id: a.id, end: a.end }, pos = endPos(S, g), X = parseKey(a.target);
+      hint = { from: pos, to: X };
+      for (const q of [pos, X]) {
+        const fz = fitZoom(cur.P(q)); if (fz < view.zoom) view.zoom = fz;
+      }
+      if (a.kind === 'line') {
+        const L = S.lines.find(l => l.key === a.key), h = hotspots(S.D, L).find(h => h.key === a.target), en = S.D.ed[h.edgeIdx].name;
+        const root = S.points.find(p => len(sub(p.p, pos)) < EPS), ext = Math.abs(a.end === 'hi' ? L.hi - L.core[1] : L.core[0] - L.lo) > 1e-9;
+        { const lb = L.lab, rl = root ? root.label : null; msg = () => tr('hint_ray', lb, ext, rl, en); }
+      } else {
+        const nm = edgeNameById(S.D, a.id), v = edgeVname(S.D, a.id, a.end), ex = getExt(S, a.id), Le = S.D.ed[+a.id.slice(1)].L;
+        const was = a.end === 'hi' ? ex[1] > Le + 1e-9 : ex[0] < -1e-9;
+        msg = () => tr('hint_edge', nm, was, v);
+      }
+    } else {
+      mode = 'seg';
+      hint = { hot: a.target };
+      msg = () => tr('hint_pick');
+    }
+    render();
+  });
+
+  /* ---------- Сохранение в PDF / HTML: можно собрать несколько построений в один файл ---------- */
+  const SUBS = '₀₁₂₃₄₅₆₇₈₉', escH = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+  function plain(html) {
+    const d = document.createElement('div'); d.innerHTML = html;
+    d.querySelectorAll('sub').forEach(s => { s.textContent = s.textContent.replace(/\d/g, c => SUBS[+c]); });
+    return d.textContent.replace(/\s+/g, ' ').trim();
+  }
+  function svgXml() {
+    const root = document.documentElement, prev = root.getAttribute('data-theme');
+    root.setAttribute('data-theme', 'light');
+    let css = '';
+    for (const sh of document.styleSheets) { try { for (const r of sh.cssRules) css += r.cssText + '\n'; } catch (e) { /* чужая таблица */ } }
+    const cs = getComputedStyle(root), vars = [...new Set(css.match(/--[a-z-]+(?=:)/g) || [])];
+    const vtxt = vars.map(v => v + ':' + cs.getPropertyValue(v)).join(';');
+    if (prev === null) root.removeAttribute('data-theme'); else root.setAttribute('data-theme', prev);
+    const c = svg.cloneNode(true);
+    c.querySelectorAll('.ring-hint, .ring-sel').forEach(e => e.remove());
+    const vb = svg.getAttribute('viewBox').split(/\s+/).map(Number), w = 1100, h = Math.round(w * vb[3] / vb[2]);
+    c.setAttribute('width', w); c.setAttribute('height', h); c.removeAttribute('style');
+    const st = document.createElementNS('http://www.w3.org/2000/svg', 'style');
+    st.textContent = css + '\nsvg#fig{' + vtxt + ';aspect-ratio:auto}';
+    c.insertBefore(st, c.firstChild);
+    return { xml: new XMLSerializer().serializeToString(c), w, h };
+  }
+  /* Снимок текущего построения */
+  function snapshot() {
+    const x = svgXml();
+    return { shape: TASK.D.kind, name: TASK.D.name, facts: givenFacts(), log: S.log.slice(), done: S.done, kind: TASK.kind, xml: x.xml, w: x.w, h: x.h };
+  }
+  const loadImg = xml => new Promise((res, rej) => {
+    const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('svg'));
+    im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(xml);
+  });
+  function wrapText(ctx, text, maxW) {
+    const out = []; let line = '';
+    for (const w of text.split(' ')) {
+      const t = line ? line + ' ' + w : w;
+      if (ctx.measureText(t).width > maxW && line) { out.push(line); line = w; } else line = t;
+    }
+    if (line) out.push(line); return out;
+  }
+  async function pageCanvas(sn, idx, total) {
+    const im = await loadImg(sn.xml), fw = sn.w, fh = sn.h;
+    const W = 1240, M = 70, TW = W - 2 * M, FONT = "'Golos Text', 'Noto Sans', 'DejaVu Sans', Arial, sans-serif";
+    const blocks = [];
+    blocks.push({ t: tr('report_head', idx, total), f: 20, c: '#5a6685', gap: 10 });
+    blocks.push({ t: plain(stmtHtml(sn.shape, sn.name)), f: 28, c: '#18223a', gap: 12 });
+    blocks.push({ t: sn.facts.map(f => plain(f.edge ? tr('fact_edge', f.lb, f.edge) : tr('fact_face', f.lb, f.face))).join('   ·   '), f: 22, c: '#5a6685', gap: 24 });
+    blocks.push({ img: true });
+    blocks.push({ t: tr('steps_h'), f: 26, c: '#18223a', bold: true, gap: 10, top: 20 });
+    if (sn.log.length) sn.log.forEach((s, i) => blocks.push({ t: (i + 1) + '. ' + plain(logHtml(s)), f: 22, c: '#18223a', gap: 6, indent: 36 }));
+    else blocks.push({ t: tr('no_steps'), f: 22, c: '#5a6685', gap: 6 });
+    if (sn.done) blocks.push({ t: tr('result', sn.kind), f: 26, c: '#0b7f70', bold: true, gap: 6, top: 18 });
+    const cv = document.createElement('canvas'), ctx = cv.getContext('2d');
+    let y = M; const lay = [];
+    for (const b of blocks) {
+      if (b.img) { lay.push({ img: true, y }); y += fh * TW / fw + 24; continue; }
+      ctx.font = (b.bold ? '600 ' : '') + b.f + 'px ' + FONT;
+      const lines = wrapText(ctx, b.t, TW - (b.indent || 0)), lh = Math.round(b.f * 1.4);
+      y += b.top || 0; lay.push({ b, lines, y, lh }); y += lines.length * lh + (b.gap || 0);
+    }
+    const H_ = Math.max(Math.round(W * 1.414), y + M);
+    cv.width = W; cv.height = H_;
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H_); ctx.textBaseline = 'top';
+    for (const l of lay) {
+      if (l.img) {
+        const ih = fh * TW / fw;
+        ctx.fillStyle = '#fbfcfe'; ctx.fillRect(M, l.y, TW, ih);
+        ctx.drawImage(im, M, l.y, TW, ih); ctx.strokeStyle = '#d3d9e8'; ctx.lineWidth = 2; ctx.strokeRect(M, l.y, TW, ih); continue;
+      }
+      const b = l.b; ctx.font = (b.bold ? '600 ' : '') + b.f + 'px ' + FONT; ctx.fillStyle = b.c;
+      l.lines.forEach((ln, i) => ctx.fillText(ln, M + (i === 0 || !b.indent ? 0 : b.indent), l.y + i * l.lh));
+    }
+    return cv;
+  }
+  function pdfFromCanvases(cvs) {
+    const enc = new TextEncoder(), parts = [], offs = [], n = cvs.length, pw = 595;
+    let pos = 0; const push = b => { const u = typeof b === 'string' ? enc.encode(b) : b; parts.push(u); pos += u.length; };
+    const obj = (id, body) => { offs[id] = pos; push(id + ' 0 obj\n'); push(body); push('\nendobj\n'); };
+    push('%PDF-1.4\n');
+    obj(1, '<< /Type /Catalog /Pages 2 0 R >>');
+    obj(2, '<< /Type /Pages /Kids [' + cvs.map((_, i) => (3 + i * 3) + ' 0 R').join(' ') + '] /Count ' + n + ' >>');
+    cvs.forEach((cv, i) => {
+      const jpg = atob(cv.toDataURL('image/jpeg', 0.92).split(',')[1]), img = new Uint8Array(jpg.length);
+      for (let j = 0; j < jpg.length; j++) img[j] = jpg.charCodeAt(j);
+      const ph = +(cv.height * pw / cv.width).toFixed(2), pg = 3 + i * 3, cs = 'q ' + pw + ' 0 0 ' + ph + ' 0 0 cm /Im0 Do Q';
+      obj(pg, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + pw + ' ' + ph + '] /Contents ' + (pg + 1) + ' 0 R /Resources << /XObject << /Im0 ' + (pg + 2) + ' 0 R >> >> >>');
+      obj(pg + 1, '<< /Length ' + cs.length + ' >>\nstream\n' + cs + '\nendstream');
+      offs[pg + 2] = pos; push((pg + 2) + ' 0 obj\n<< /Type /XObject /Subtype /Image /Width ' + cv.width + ' /Height ' + cv.height + ' /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ' + img.length + ' >>\nstream\n'); push(img); push('\nendstream\nendobj\n');
+    });
+    const total = 3 * n + 3, xr = pos; push('xref\n0 ' + total + '\n0000000000 65535 f \n');
+    for (let k = 1; k < total; k++) push(String(offs[k]).padStart(10, '0') + ' 00000 n \n');
+    push('trailer\n<< /Size ' + total + ' /Root 1 0 R >>\nstartxref\n' + xr + '\n%%EOF');
+    const out = new Uint8Array(pos); let o = 0; for (const p of parts) { out.set(p, o); o += p.length; }
+    return out;
+  }
+  function htmlFromSnaps(sns) {
+    const sec = (sn, i) => {
+      const b64 = btoa(unescape(encodeURIComponent(sn.xml)));
+      const steps = sn.log.length ? '<ol>' + sn.log.map(s => '<li>' + logHtml(s) + '</li>').join('') + '</ol>' : '<p class="m">' + tr('no_steps') + '</p>';
+      return '<section><p class="m">' + tr('report_head', i, sns.length) + '</p><p style="font-size:19px">' + stmtHtml(sn.shape, sn.name) + '</p><ul class="f">' +
+        factsHtml(sn.facts) + '</ul><img alt="' + tr('alt_fig') + '" src="data:image/svg+xml;base64,' + b64 + '"><h2>' + tr('steps_h') + '</h2>' + steps +
+        (sn.done ? '<p class="r">' + escH(tr('result', sn.kind)) + '</p>' : '') + '</section>';
+    };
+    return '<!doctype html><html lang="' + LANG + '"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + tr('html_title') + '</title><style>' +
+      "body{font:16px/1.55 'Golos Text','Noto Sans',Arial,sans-serif;color:#18223a;max-width:900px;margin:24px auto;padding:0 16px}i{font-family:'PT Serif',Georgia,serif}sub{font-size:.72em;line-height:0;font-style:normal}" +
+      'section{padding-bottom:28px;margin-bottom:28px;border-bottom:2px solid #d3d9e8;break-after:page}.m{color:#5a6685}.f{display:flex;flex-wrap:wrap;gap:4px 20px;list-style:none;padding:0;color:#5a6685}' +
+      'img{width:100%;border:1px solid #d3d9e8;border-radius:8px;background:#fbfcfe}h2{font-size:18px}.r{color:#0b7f70;font-weight:600}</style></head><body>' + sns.map(sec).join('') + '</body></html>';
+  }
+  /* Накопленные построения */
+  const KEEP = 'sections.report2';
+  let report = [];
+  try { report = JSON.parse(localStorage.getItem(KEEP) || '[]'); if (!Array.isArray(report)) report = []; } catch (e) { report = []; }
+  const keepSave = () => { try { localStorage.setItem(KEEP, JSON.stringify(report)); } catch (e) { /* не страшно */ } };
+  function reportUi() {
+    $('rep-count').textContent = report.length ? tr('rep_count', report.length) : '';
+    $('rep-clear').hidden = !report.length;
+  }
+  let dl = null;
+  try { if (window.claude && claude.use) claude.use('downloads').then(d => { if (d) dl = d; }).catch(() => {}); } catch (e) { /* нет платформы */ }
+  /* В claude.ai сохраняем через разрешение платформы, в скачанном html-файле — обычной загрузкой браузера */
+  async function saveFile(name, data, mime) {
+    if (dl) return dl.save({ filename: name, data });
+    const url = URL.createObjectURL(new Blob([data], { type: mime })), a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  }
+  const toSave = () => report.length ? report : [snapshot()];
+  async function doSave(kind) {
+    try {
+      const sns = toSave();
+      if (kind === 'html') window.__html = htmlFromSnaps(sns), await saveFile('cross_section.html', window.__html, 'text/html');
+      else {
+        const cvs = []; for (let i = 0; i < sns.length; i++) cvs.push(await pageCanvas(sns[i], i, sns.length));
+        window.__pdf = pdfFromCanvases(cvs); await saveFile('cross_section.pdf', window.__pdf, 'application/pdf');
+      }
+    } catch (e) { if (!e || e.code !== 'declined') { msg = () => tr('save_fail'); render(); } }
+  }
+  $('save-pdf').addEventListener('click', () => doSave('pdf'));
+  $('save-html').addEventListener('click', () => doSave('html'));
+  $('rep-add').addEventListener('click', () => {
+    if (report.length >= 30) { msg = () => tr('rep_full'); render(); return; }
+    report.push(snapshot()); keepSave(); reportUi();
+    { const n = report.length; msg = () => tr('rep_added', n); } render();
+  });
+  $('rep-clear').addEventListener('click', () => { report = []; keepSave(); reportUi(); msg = () => tr('rep_cleared'); render(); });
+  reportUi();
+
+  $('done').addEventListener('click', () => {
+    if (S.done) return;
+    if (!isComplete(S, TASK)) {
+      msg = () => tr('not_done');
+      render(); return;
+    }
+    S.done = true; hist = []; clearAux();
+    let pt = false;
+    if (!usedHint) { score += 1; pt = true; try { localStorage.setItem(LS, String(score)); } catch (e) { } }
+    { const kd = TASK.kind; msg = () => tr('done_ok', kd, pt); }
+    render();
+  });
+  $('new').addEventListener('click', newTask);
+  $('level').addEventListener('change', e => { level = e.target.value; newTask(); });
+  $('shape').addEventListener('change', e => { shape = e.target.value; newTask(); });
+
+  let raf = 0;
+  const redraw = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(() => { if (S && !drag) render(); }); };
+  if (window.ResizeObserver) new ResizeObserver(redraw).observe(svg.parentElement); else window.addEventListener('resize', redraw);
+
+  $('lang-ru').addEventListener('click', () => setLanguage('ru'));
+  $('lang-en').addEventListener('click', () => setLanguage('en'));
+  if (/github\.io$/.test(location.hostname)) $('home').hidden = false;
+  applyStatic();
+  newTask();
+})();
+
+</script>
